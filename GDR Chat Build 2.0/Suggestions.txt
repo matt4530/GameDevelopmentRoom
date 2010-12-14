@@ -1,0 +1,1 @@
+After clicking username, put input in focus
