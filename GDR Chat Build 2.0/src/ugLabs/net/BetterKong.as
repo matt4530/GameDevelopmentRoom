@@ -1,7 +1,7 @@
-﻿package ugLabs.net
+package ugLabs.net
 {
 	/**
-	 * Kong by UnknownGuardian. November 24th 2010.
+	 * BetterKong by UnknownGuardian. November 24th 2010.
 	 * Visit http://profusiongames.com/ and http://github.com/UnknownGuardian
 	 *
 	 * Copyright (c) 2010 ProfusionGames
@@ -54,7 +54,7 @@
 	 * 
 	 * 
 	 * 
-	 * English: Use, distribute, etc to this with keeping credits and copyright
+	 * English: Use, distributed, etc to this with keeping credits and copyright
 	 */
 
 	import com.adobe.serialization.json.JSON;
@@ -71,7 +71,7 @@
 	
 	
 	//Singleton Class
-	public class Kong
+	public class BetterKong
 	{
 		private static var _instance:Kong;
 		private static var _okToCreate:Boolean = false;
@@ -87,7 +87,7 @@
 		
 		
 		public static var userName:String = "";
-		public static var userId:String = "";
+		public static var userID:String = "";
 		public static var userToken:String = "";
 		
 		public static var isGuest:Boolean = false;
@@ -106,39 +106,44 @@
 		
 		
 		//private stuff used in methods
-		private static var loadAPICallback:Function;
 		private static var getPlayerInfoCallback:Function;
 		
 		
 		
 		
 		
-		public function Kong()
+		public function BetterKong()
 		{
-			if( !Kong._okToCreate ){
-				throw new Error("[Kong] Error: " + this + " is not a singleton and must be accessed with the getInstance() method");				
+			if( !BetterKong._okToCreate ){
+				throw new Error("[BetterKong] Error: " + this + " is not a singleton and must be accessed with the getInstance() method");				
 			}
 		}
 		
 		public static function getInstance():Kong
 		{
-			if( !Kong._instance ){
-				Kong._okToCreate = true;
-				Kong._instance = new Kong();
-				Kong._okToCreate = false;
+			if( !BetterKong._instance ){
+				BetterKong._okToCreate = true;
+				BetterKong._instance = new Kong();
+				BetterKong._okToCreate = false;
 			}
-			return Kong._instance;
+			return BetterKong._instance;
 		}
+		
 		
 		
 		/**
 		 * connectToKong
 		 * @description		connects to kong for you, like a good little method
 		 * @param			s: the stage that kong connects to
-		 * @param			callback: On Kong API load complete.
+		 * @param			callback: the function to be called when completed, signals that player info is to be gathered.
 		 */
-		public static function connectToKong(s:Stage,callback:Function = null):void
-		{			
+		public static function connectToKong(s:Stage):void//, callback:Function):void
+		{
+			//if (callback != null)
+			//{
+			//	BetterKong.getPlayerInfoCallback = callback;
+			//}
+			
 			//grab the loaderinfo param
 			var paramObj:Object = LoaderInfo(s.root.loaderInfo).parameters;
  
@@ -151,51 +156,49 @@
 			// Load the API
 			var request:URLRequest = new URLRequest(apiPath);
 			var loader:Loader = new Loader();
-			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, Kong.loadedAPI);
+			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, BetterKong.loadedAPI);
 			loader.load(request);
 			s.addChild(loader);
-			
-			loadAPICallback = callback;
 		}
 		
 		
-		/**
-		 * loadedAPI
-		 * @description		Handles the loaded API, and extracts it
-		 * @param			e: Event
-		 */
+		
 		private static function loadedAPI(e:Event):void
 		{
-			e.currentTarget.removeEventListener(Event.COMPLETE, Kong.loadedAPI);
+			e.currentTarget.removeEventListener(Event.COMPLETE, BetterKong.loadedAPI);
 			api = e.target.content;
 			api.services.connect();
-			trace("[Kong] Loaded Kongregate API");
+			trace("[BetterKong] Loaded Kongregate API");
 			
 			chat = api.chat;
 			services = api.services;
 			stats = api.stats;
 			mtx = api.mtx;
 			sharedContent =  api.sharedContent;
-			try	{ images = api.images; } catch (e:Error) { } //local cannot load images API
+			
+			//local cannot load images API
+			try	{
+				images = api.images;
+			}
+			catch (e:Error) { }
 			
 			//extract basic data.
 			isGuest = services.isGuest();
 			userName = services.getUsername();
-			try	{ userId = services.getUserId(); } catch (e:Error) { } //local cannot load user id
-			userToken = services.getGameAuthToken();
 			
-			//callback
-			if(loadAPICallback != null)
-			{
-				loadAPICallback();
+			//local cannot load user id
+			try	{
+				userID = services.getUserID();
 			}
+			catch (e:Error) { }
+			userToken = services.getGameAuthToken();
 		}
 		
 		
 		/**
 		 * getPlayerInfo
 		 * @description		gets information about the player
-		 * @param			callback: On Player Info downloaded and extracted
+		 * @param			callback: function called on callback
 		 */
 		public static function getPlayerInfo(callback:Function = null):void
 		{
@@ -206,23 +209,10 @@
 			loader.load(request); 
 			getPlayerInfoCallback = callback;
 		}
-		
-		
-		/**
-		 * catchIOError
-		 * @description		Called upon an IO error
-		 * @param			e: Error - Something went wrong
-		 */
 		private static function catchIOError(e:Error):void
 		{
-			trace("[Kong] Error: Username " + userName + " does not exist.\nPlayerInfo not retrieved.");
+			trace("[BetterKong] Error: Username " + BetterKong.userName + " does not exist.\nPlayerInfo not retrieved.");
 		}
-		
-		/**
-		 * loadedPlayerInfo
-		 * @description		Handles the loaded player info and extracts it
-		 * @param			event: Contains the player info
-		 */
 		private static function loadedPlayerInfo(event:Event):void
 		{
 			var load:URLLoader = URLLoader(event.target);
@@ -230,30 +220,30 @@
 			
 			if(playerData.success)
 			{
-				isDev = playerData.user_vars.developer;
-				isCurator = playerData.user_vars.curator;
-				isForumMod = playerData.user_vars.forum_moderator;
-				isMod = playerData.user_vars.moderator;
-				isAdmin = playerData.user_vars.admin;
+				BetterKong.isDev = playerData.user_vars.developer;
+				BetterKong.isCurator = playerData.user_vars.curator;
+				BetterKong.isForumMod = playerData.user_vars.forum_moderator;
+				BetterKong.isMod = playerData.user_vars.moderator;
+				BetterKong.isAdmin = playerData.user_vars.admin;
 				
-				age = playerData.user_vars.age;
-				level = playerData.user_vars.level;
-				points = playerData.user_vars.points;
-				avatarURL = playerData.user_vars.avatar_url;
-				chatAvatarURL = playerData.user_vars.levelbug_url;
-				levelIconURL = playerData.user_vars.chat_avatar_url;
-				
+				BetterKong.age = playerData.user_vars.age;
+				BetterKong.level = playerData.user_vars.level;
+				BetterKong.points = playerData.user_vars.points;
+				BetterKong.avatarURL = playerData.user_vars.avatar_url;
+				BetterKong.chatAvatarURL = playerData.user_vars.levelbug_url;
+				BetterKong.levelIconURL = playerData.user_vars.chat_avatar_url;				
 			}
 			else
 			{
-				trace("[Kong] Error: Retrieving User Data Failed.\nData set to default values");
+				trace("[BetterKong] Error: Retrieving User Data Failed.\nData set to default values");
 			}
 			
 			//callback
-			if(getPlayerInfoCallback != null)
+			if(BetterKong.getPlayerInfoCallback != null)
 			{
-				getPlayerInfoCallback();
+				BetterKong.getPlayerInfoCallback();
 			}
 		}
 	}
 }
+

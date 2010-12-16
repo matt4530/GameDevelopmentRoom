@@ -11,6 +11,8 @@ package
 	import flash.net.navigateToURL;
 	import flash.net.URLRequest;
 	import flash.utils.getTimer;
+	import playerio.Message;
+	import ugLabs.net.Kong;
 	import ugLabs.util.StringUtil;
 	/**
 	 * ...
@@ -161,7 +163,9 @@ package
 		
 		
 		
-		//data transfers to server
+		//*********************************
+		//*  client and server functions  *
+		//*********************************
 		public function sendMessage(m:String):void
 		{
 			if (userIsSilenced) //don't send if silenced
@@ -173,6 +177,8 @@ package
 			{
 				return;
 			}
+			
+			inputBox.text = ""; //clear since message is approved, and will continue
 			
 			m = StringUtil.neutralizeHTML(m); //remove any html in the string
 			
@@ -210,6 +216,142 @@ package
 			//connection.send("ChatMessage", m)
 			timeOfLastMessage = getTimer();
 		}
+		
+		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
+		{
+			try 
+			{
+				if (message.indexOf("/silenceUser ") == 0) //silencing a user. 3 cases. 1) Silence this. 2) Display silence. 3) Kick all.
+				{
+					if (message.indexOf("/silenceUser " + Kong.userName) == 0)
+					{
+						userIsSilenced = true;
+					}
+					else if ((message.indexOf("/silenceUser !kickAll!") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
+					{
+						//TODO Disconnect user
+						//TODO Stop reconnection timer
+					}
+					else
+					{
+						var words:Array = message.split(" ", 2); //split the message with spaces
+						displayEvent("silenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+					}
+					return;
+				}
+				
+				if (message.indexOf("/adminBan") == 0) //banning a user. 1) Bans this. 2) Display Ban.
+				{
+					if (message.indexOf("/adminBan " + Kong.userName) == 0)
+					{
+						userIsSilenced = true;
+						banUser();
+					}
+					else
+					{
+						var words:Array = message.split(" ", 2); //split the message with spaces
+						displayEvent("banned", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+					}
+					return;
+				}
+				
+				if (message.indexOf("/setColor") == 0) //changing a color.
+				{
+					var words:Array = message.split(" ", 2); //split the message with spaces
+					//TODO /setColor
+					//example: userbox.setColor(id, words[2]);
+					return;
+				}
+				
+				if(message.indexOf("codeD") != -1) //code link
+				{
+					var words:Array = message.split(" ", 2);
+					for (var i:int = 0; i < words.length; i++)
+					{
+						if (words[i].indexOf("codeD") == 0) //grab any codeD's on the line. Could be more than 1.
+						{
+							//TODO codeD clicking on
+							words[i] = "CODE" + words[i] + "/CODE"
+						}
+					}
+				}
+			} 
+			catch (e:Error)
+			{
+				
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//********************************
+		//*  client side only functions  *
+		//********************************
+		//credit to skyboy
+		public function displayMessage(message:String):void {
+			var pos:Number = chatBox.verticalScrollPosition;
+			var snap:Boolean = (chatBox.maxVerticalScrollPosition - pos < 2)
+			chatBox.htmlText += getTimeStamp() +  message;
+			if (snap) {
+				chatBox.verticalScrollPosition = chatBox.maxVerticalScrollPosition;
+			} else {
+				chatBox.verticalScrollPosition = pos;
+			}
+		}
+		public function displayEvent(type:String, n:String):void
+		{
+			switch(type)
+			{
+				case "join":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " joined GDR]</font>");
+					break;
+				case "leave":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " left GDR]</font>");
+					break;
+				case "silenced":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " silenced]</font>");
+					break;
+				case "banned":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " banned]</font>");
+					break;
+				case "toAFK":
+					displayMessage('<font color="#C0C0C0" size="12">[Status: AFK]</font>');
+					break;
+				case "backAFK":
+					displayMessage('<font color="#C0C0C0" size="12">[Status: BACK]</font>');
+					break;
+				case "muteSound":
+					displayMessage('<font color="#C0C0C0" size="12">[Sound Off]</font>');
+					break;
+				case "unmuteSound":
+					displayMessage('<font color="#C0C0C0" size="12">[Sound On]</font>');
+					break;
+				default:
+					break;
+			}
+		}
+		public function kDown(e:KeyboardEvent):void
+		{
+			if (e.keyCode == 13) //enter
+			{
+				sendMessage(inputBox.text);
+			}
+		}
+		
+		
+		
+		
 		
 		
 		//utility
@@ -254,6 +396,13 @@ package
 		public function showTab(t:String):void
 		{
 			
+		}
+		public function getUserNameFromId(id:String):String {
+			//TODO getUserNameFromId();
+			return "";
+		}
+		public function banUser():void {
+			//TODO banUser();
 		}
 		
 	}
