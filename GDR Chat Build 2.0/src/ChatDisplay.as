@@ -265,7 +265,7 @@ package
 				
 				if(message.indexOf("codeD") != -1) //code link
 				{
-					var words:Array = message.split(" ", 2);
+					var words:Array = message.split(" ");
 					for (var i:int = 0; i < words.length; i++)
 					{
 						if (words[i].indexOf("codeD") == 0) //grab any codeD's on the line. Could be more than 1.
@@ -275,6 +275,46 @@ package
 						}
 					}
 				}
+				
+				if (message.indexOf("http://") != -1)
+				{
+					var words:Array = message.split(" ");
+					for (var i:int = 0; i < words.length; i++)
+					{
+						if (words[i].indexOf("http://") == 0) //grab any codeD's on the line. Could be more than 1.
+						{
+							//TODO codeD clicking on
+							words[i] = "LINK" + words[i] + "/LINK"
+						}
+					}
+				}
+				
+				
+				if (message.indexOf("/w ") == 0) //private messages 4 cases. 1) Sending to you. 2)From you. 3)For UnknownGuardian 4)What everyone else should see
+				{
+					var words:Array = message.split(" ", 2);
+					if (words[1] == Kong.userName)
+					{
+						var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
+						message = '<font color="#0098FFF">' + restOfMessage + '</font>';
+					}
+					else if (getUserNameFromId(id) == Kong.userName)
+					{
+						var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
+						message = '<font color="#0098FFF">(To ' + words[1] + ") " +  restOfMessage + '</font>';
+					}
+					else if (getUserNameFromId(id) == "UnknownGuardian")
+					{
+						message = '<font color="#0098FFF">' + message + '</font>';
+					}
+					else
+					{
+						return;
+					}
+				}
+				
+				displayMessage('<font color="#000000"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
+				
 			} 
 			catch (e:Error)
 			{
