@@ -120,18 +120,18 @@
 				displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
 			}
 		}
-		private function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
+		private function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void//
 		{
 			//handle user scroll box
 			userScrollBox.onJoin(m, id, name, type, color, status);
 			displayEvent("join", name);
 		}
-		private function onLeave(m:Message, id:String):void
+		private function onLeave(m:Message, id:String):void//
 		{
 			displayEvent("leave", userScrollBox.users[id].UserName);
 			userScrollBox.onLeave(m, id);
 		}
-		private function onMessage(m:Message = null, id:String = "", message:String = ""):void
+		private function onMessage(m:Message = null, id:String = "", message:String = ""):void//
 		{
 			Log.CustomMetric("Message Recieved", "Messages");
 			
@@ -340,14 +340,14 @@
 		
 		
 		
-		public function kDown(e:KeyboardEvent):void
+		public function kDown(e:KeyboardEvent):void//
 		{
 			if (e.keyCode == 13)
 			{
 				sendChatText();
 			}
 		}
-		public function sendChatText():void
+		public function sendChatText():void//
 		{
 			if(silenced)
 			{
@@ -366,7 +366,7 @@
 			sendMessage(myInputField.text)
 			myInputField.text = "";
 		}
-		public function sendMessage(message:String):void
+		public function sendMessage(message:String):void//
 		{
 			//strip the html
 			//message = StringUtil.stripHTML(message);
@@ -464,7 +464,7 @@
 		
 		
 		//credit to skyboy
-		public function displayMessage(message:String):void {
+		public function displayMessage(message:String):void {//
 			var pos:Number = myTextArea.verticalScrollPosition, snap:Boolean = (myTextArea.maxVerticalScrollPosition - pos < 2)
 			myTextArea.htmlText += getTimeStamp() +  message;
 			if (snap) {
@@ -473,7 +473,7 @@
 				myTextArea.verticalScrollPosition = pos;
 			}
 		}
-		public function displayEvent(type:String, n:String):void
+		public function displayEvent(type:String, n:String):void//
 		{
 			switch(type)
 			{
@@ -503,7 +503,7 @@
 			}
 		}
 		
-		public function textLink(e:TextEvent):void
+		public function textLink(e:TextEvent):void//
 		{
 			if (e.text.indexOf("codeD") != -1)
 			{
@@ -531,7 +531,7 @@
 		
 		
 		
-		public function getTimeStamp():String
+		public function getTimeStamp():String//
 		{
 			var time:Date = new Date();
 			
@@ -557,27 +557,27 @@
 		}
 		
 		
-		public function gainedFocus(e:Event):void
+		public function gainedFocus(e:Event):void//
 		{
 			Log.CustomMetric("Returned", "Status");
 			isAFK = false;
 		}
-		public function lostFocus(e:Event):void
+		public function lostFocus(e:Event):void//
 		{
 			Log.CustomMetric("Went AFK", "Status");
 			isAFK = true;
 		}
-		public function changeFocus(e:FocusEvent):void
+		public function changeFocus(e:FocusEvent):void//
 		{
 			tempScroll = myTextArea.verticalScrollPosition;
 		}
-		public function changeFocusAgain(e:FocusEvent):void
+		public function changeFocusAgain(e:FocusEvent):void//
 		{
 			myTextArea.verticalScrollPosition = tempScroll;
 		}
 		
 		
-		public function trimForSpammers(s:String):String
+		public function trimForSpammers(s:String):String//
 		{
 			var n:String = Kong._userName;
 			if (n == "Flash_God" || n == "DannyDaNinja")
@@ -587,7 +587,7 @@
 			return s;
 		}
 		
-		public function banUser():void
+		public function banUser():void//
 		{
 			var s:SharedObject = SharedObject.getLocal("dataD");
 			

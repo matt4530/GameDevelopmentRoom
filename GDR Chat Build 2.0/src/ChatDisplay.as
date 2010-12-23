@@ -25,8 +25,11 @@ package
 		
 		public var inputBox:TextInput;
 		
+		public var userManager:UserManager;
+		
 		private var soundMuted:Boolean = false;
 		private var userIsSilenced:Boolean = false;
+		private var userLostFocus:Boolean = false;
 		private var timeOfLastMessage:int = 0;
 		private var minMessageInverval:int = 1250;
 		
@@ -46,6 +49,7 @@ package
 			createHeader();
 			createTabs();
 			connectToPlayerIO();
+			addFocusEvents();
 		}
 		
 		public function createUserList():void
@@ -54,6 +58,11 @@ package
 			b.x = 5;
 			b.y = 65;
 			addChild(b);
+			
+			userManager = new UserManager();
+			userManager.x = b.x;
+			userManager.y = b.y;
+			addChild(userManager);
 		}
 		public function createLinksList():void
 		{
@@ -75,7 +84,7 @@ package
 			inputBox.y = b.y + b.height - inputBox.height;
 			inputBox.width = b.width;
 			inputBox.drawFocus(false);
-			//inputBox.addEventListener(KeyboardEvent.KEY_DOWN, kDown);
+			inputBox.addEventListener(KeyboardEvent.KEY_DOWN, kDown);
 			addChild(inputBox);
 			
 			chatBox = new TextArea();
@@ -87,7 +96,7 @@ package
 			chatBox.y = b.y;
 			chatBox.width = b.width;
 			chatBox.height = b.height - inputBox.height;
-			//chatBox.addEventListener(TextEvent.LINK, textLink);
+			chatBox.addEventListener(TextEvent.LINK, textLink);
 			chatBox.addEventListener(FocusEvent.FOCUS_OUT, changeFocus,false,9001);
 			chatBox.addEventListener(FocusEvent.FOCUS_OUT, changeFocusAgain, false, -9001);
 			chatBox.drawFocus(false);
@@ -159,6 +168,11 @@ package
 		{
 			
 		}
+		public function addFocusEvents():void
+		{
+			stage.addEventListener(Event.ACTIVATE, gainedFocus);
+			stage.addEventListener(Event.DEACTIVATE, lostFocus);
+		}
 		
 		
 		
@@ -166,6 +180,17 @@ package
 		//*********************************
 		//*  client and server functions  *
 		//*********************************
+		private function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
+		{
+			//handle user scroll box
+			//userScrollBox.onJoin(m, id, name, type, color, status);
+			displayEvent("join", name);
+		}
+		private function onLeave(m:Message, id:String):void
+		{
+			displayEvent("leave", getUserNameFromId(id));
+			//userScrollBox.onLeave(m, id);
+		}
 		public function sendMessage(m:String):void
 		{
 			if (userIsSilenced) //don't send if silenced
@@ -206,21 +231,48 @@ package
 					//return;
 			}
 			
+			if (m.indexOf("/unicorn") == 0) //unicorn
+			{
+				displayMessage('<font size="12"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> ' + "Believe!" + '</font>');
+				Kong.stats.submit("UnicornsBelievedIn", 1);
+				return;
+			}
+			
+			
+			if (m.indexOf("/silenceUser ") == 0 && !(isUserMod(Kong.userId) || isUserAdmin(Kong.userId))) //if a non mod tries to silence
+			{
+				return;
+			}
+			if (m.indexOf("/adminBan ") == 0 && !isUserAdmin(Kong.userId)) //if a non mod tries to silence
+			{
+				return;
+			}
 			
 			if(m.length > 500)//trim message to 500 chars max
 			{
 				m = m.substring(0,500);
 			}
+			if (m == "" || m == " " || m == "  " || m == "v") //check for basic spam
+			{
+				return;
+			}
 			
 			
 			//connection.send("ChatMessage", m)
 			timeOfLastMessage = getTimer();
+			
+			//TODO If not connected, don't send message.
+			//TODO Send message
+			onMessage(null, "UG", m);
 		}
 		
 		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
 		{
+			trace("[onMessage] Original Message: " + message);
 			try 
 			{
+				var words:Array;
+				
 				if (message.indexOf("/silenceUser ") == 0) //silencing a user. 3 cases. 1) Silence this. 2) Display silence. 3) Kick all.
 				{
 					if (message.indexOf("/silenceUser " + Kong.userName) == 0)
@@ -234,7 +286,7 @@ package
 					}
 					else
 					{
-						var words:Array = message.split(" ", 2); //split the message with spaces
+						words = message.split(" ", 2); //split the message with spaces
 						displayEvent("silenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -249,7 +301,7 @@ package
 					}
 					else
 					{
-						var words:Array = message.split(" ", 2); //split the message with spaces
+						words = message.split(" ", 2); //split the message with spaces
 						displayEvent("banned", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -257,50 +309,49 @@ package
 				
 				if (message.indexOf("/setColor") == 0) //changing a color.
 				{
-					var words:Array = message.split(" ", 2); //split the message with spaces
-					//TODO /setColor
+					words = message.split(" ", 2); //split the message with spaces
+					//TODO setColor
 					//example: userbox.setColor(id, words[2]);
 					return;
 				}
 				
 				if(message.indexOf("codeD") != -1) //code link
 				{
-					var words:Array = message.split(" ");
+					words = message.split(" ");
 					for (var i:int = 0; i < words.length; i++)
 					{
 						if (words[i].indexOf("codeD") == 0) //grab any codeD's on the line. Could be more than 1.
 						{
-							//TODO codeD clicking on
-							words[i] = "CODE" + words[i] + "/CODE"
+							words[i] = '<b><i><font color="#0078FF"><a href=\"event:' + words[i] + '">' + words[i] + '</a></font></i></b>';
 						}
 					}
+					message = words.join(" ");
 				}
 				
 				if (message.indexOf("http://") != -1)
 				{
-					var words:Array = message.split(" ");
-					for (var i:int = 0; i < words.length; i++)
+					words = message.split(" ");
+					for (var j:int = 0; j < words.length; j++)
 					{
-						if (words[i].indexOf("http://") == 0) //grab any codeD's on the line. Could be more than 1.
+						if (words[j].indexOf("http://") == 0 || words[j].indexOf("www.") == 0 || words[j].indexOf("https://") == 0) //grab any codeD's on the line. Could be more than 1.
 						{
-							//TODO codeD clicking on
-							words[i] = "LINK" + words[i] + "/LINK"
+							words[j] = '<font color="#0000FF"><a href=\"event:' + words[j] + '">' + words[j] + '</a></font>';
 						}
 					}
+					message = words.join(" ");
 				}
 				
 				
 				if (message.indexOf("/w ") == 0) //private messages 4 cases. 1) Sending to you. 2)From you. 3)For UnknownGuardian 4)What everyone else should see
 				{
-					var words:Array = message.split(" ", 2);
+					words = message.split(" ", 2);
+					var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 					if (words[1] == Kong.userName)
 					{
-						var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 						message = '<font color="#0098FFF">' + restOfMessage + '</font>';
 					}
 					else if (getUserNameFromId(id) == Kong.userName)
 					{
-						var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 						message = '<font color="#0098FFF">(To ' + words[1] + ") " +  restOfMessage + '</font>';
 					}
 					else if (getUserNameFromId(id) == "UnknownGuardian")
@@ -313,7 +364,8 @@ package
 					}
 				}
 				
-				displayMessage('<font color="#000000"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
+				trace("[onMessage] Final Message: " + message);
+				displayMessage('<font color="#000000" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
 				
 			} 
 			catch (e:Error)
@@ -381,6 +433,27 @@ package
 					break;
 			}
 		}
+		public function textLink(e:TextEvent):void
+		{
+			if (e.text.indexOf("codeD") != -1)
+			{				
+				//var p:PasteBin = PasteBin(stage.getChildByName("PasteBin"));
+				//p.loadField.text = e.text;
+				//p.loadCode(null);
+			}
+			else if ( e.text.indexOf("@name") != -1)
+			{
+				inputBox.appendText( e.text.substring(e.text.indexOf("@name")+5));
+			}
+			else if (e.text.indexOf("@reply") != -1)
+			{
+				inputBox.appendText("/w " + e.text.substring(e.text.indexOf("@reply")+6));
+			}
+			else if (e.text.indexOf("http://") != -1)
+			{
+				navigateToURL( new URLRequest(e.text));
+			}
+		}
 		public function kDown(e:KeyboardEvent):void
 		{
 			if (e.keyCode == 13) //enter
@@ -406,6 +479,12 @@ package
 		}
 		public function changeFocusAgain(e:FocusEvent):void	{
 			chatBox.verticalScrollPosition = tempScroll;
+		}
+		public function gainedFocus(e:Event):void {
+			userLostFocus = false;
+		}
+		public function lostFocus(e:Event):void	{
+			userLostFocus = true;
 		}
 		public function getTimeStamp():String {
 			var time:Date = new Date();
@@ -439,7 +518,15 @@ package
 		}
 		public function getUserNameFromId(id:String):String {
 			//TODO getUserNameFromId();
-			return "";
+			return "UG";
+		}
+		public function isUserMod(id:String):Boolean {
+			//TODO isUserMod
+			return false;
+		}
+		public function isUserAdmin(id:String):Boolean {
+			//TODO isUserAdmin
+			return false;
 		}
 		public function banUser():void {
 			//TODO banUser();
