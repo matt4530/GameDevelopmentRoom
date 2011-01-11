@@ -38,9 +38,11 @@ package {
 		private var _background:Shape;
 		private var _maxSpeed:uint = 5;
 		private var _speed:Number;
+		private var _chat:Sprite
 		public var users:Object = {};
 
-		public function UserManager () {
+		public function UserManager (s:Sprite) {
+			this._chat = s;
 		}
 		
 		public function onInit(m:Message, id:String):void
@@ -48,7 +50,8 @@ package {
 			//this loops though the message containing a string of all users currently in the game when they log in
 			for( var a:int=1;a<m.length;a+=5){
 				//add each user
-				addUser(m.getString(a),m.getString(a+1),m.getString(a+2),m.getString(a+3),m.getString(a+4))
+				addUser(m.getString(a), m.getString(a + 1), m.getString(a + 2), m.getString(a + 3), m.getString(a + 4))
+				trace(m.toString());
 			}
 			//draw the userbox
 			createRollingScroller();
@@ -137,6 +140,24 @@ package {
 			}*/
 			users[id].color = color;
 		}
+		public function getName(id:String):String
+		{
+			trace("---Searching in getName()----");
+			for(var q:Object in users)
+			{
+				trace(users[q].toString());
+			}
+			trace("---Searching in getName() done----");
+			return "cake";//users[id].UserName;
+		}
+		public function isMod(id:String):Boolean
+		{
+			return users[id].isMod || users[id].isGameMod;
+		}
+		public function isAdmin(id:String):Boolean
+		{
+			return users[id].isAdmin;
+		}
 
 
 		private function createRollingScroller(event:Event = null):void
@@ -171,7 +192,7 @@ package {
 			}
 			//regular method
 			_container = new Sprite();
-			addChild(_container);
+			_chat.addChild(_container);
 			
 			
 			

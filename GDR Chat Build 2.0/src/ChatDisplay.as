@@ -45,10 +45,10 @@ package
 			createUserList();
 			createLinksList();
 			createChatBox();
+			connectToPlayerIO();
 			createBorders();
 			createHeader();
 			createTabs();
-			connectToPlayerIO();
 			addFocusEvents();
 		}
 		
@@ -59,7 +59,7 @@ package
 			b.y = 65;
 			addChild(b);
 			
-			userManager = new UserManager();
+			userManager = new UserManager(this);
 			userManager.x = b.x;
 			userManager.y = b.y;
 			addChild(userManager);
@@ -166,7 +166,11 @@ package
 		}
 		public function connectToPlayerIO():void
 		{
-			
+			Main.connection.addMessageHandler("ChatInit", onInit)
+			Main.connection.addMessageHandler("ChatJoin", onJoin);
+			Main.connection.addMessageHandler("ChatLeft", onLeave);
+			Main.connection.addMessageHandler("ChatMessage", onMessage)
+			trace("[ChatDisplay][connectToPlayerIO] Added Init/Join/Left/Message Listeners to Connection");
 		}
 		public function addFocusEvents():void
 		{
@@ -180,19 +184,34 @@ package
 		//*********************************
 		//*  client and server functions  *
 		//*********************************
+		private function onInit(m:Message, id:String):void
+		{
+			//handle user scroll box
+			userManager.onInit(m, id);	
+			trace("[ChatDisplay][onInit] m = " + m + ", id = " + id);
+			
+			if (chatBox.htmlText.length < 100)
+			{
+				displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
+				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
+			}
+		}
 		private function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{
 			//handle user scroll box
-			//userScrollBox.onJoin(m, id, name, type, color, status);
+			trace("[ChatDisplay][onJoin] m = " + m + ", id = " + id + ", name = " + name + ", type = " + type +", color = " + color + ", status = " + status);
+			userManager.onJoin(m, id, name, type, color, status);
 			displayEvent("join", name);
 		}
 		private function onLeave(m:Message, id:String):void
 		{
+			trace("[ChatDisplay][onLeave] m = " + m + ", id = " + id);
 			displayEvent("leave", getUserNameFromId(id));
-			//userScrollBox.onLeave(m, id);
+			userManager.onLeave(m, id);
 		}
 		public function sendMessage(m:String):void
 		{
+			trace("[ChatDisplay][sendMessage] m = " + m);
 			if (userIsSilenced) //don't send if silenced
 			{
 				inputBox.text = "You cannot chat while silenced";
@@ -257,18 +276,19 @@ package
 				return;
 			}
 			
+			if(!Main.connection.connected)
+			{
+				displayMessage('<font color="#FF0000" size="12">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
+				return;
+			}
 			
-			//connection.send("ChatMessage", m)
 			timeOfLastMessage = getTimer();
-			
-			//TODO If not connected, don't send message.
-			//TODO Send message
-			onMessage(null, "UG", m);
+			Main.connection.send("ChatMessage", m)
 		}
 		
 		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
 		{
-			trace("[onMessage] Original Message: " + message);
+			trace("[ChatDisplay][onMessage] m = " + m + ", id = " + id + ", message = " + message);
 			try 
 			{
 				var words:Array;
@@ -281,8 +301,9 @@ package
 					}
 					else if ((message.indexOf("/silenceUser !kickAll!") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
 					{
-						//TODO Disconnect user
 						//TODO Stop reconnection timer
+						Main.connection.disconnect();
+						displayMessage('<font color="#CC0033" size="13">[System] System has been forced to disconnect you. Please refresh.</font>');
 					}
 					else
 					{
@@ -364,13 +385,13 @@ package
 					}
 				}
 				
-				trace("[onMessage] Final Message: " + message);
+				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
 				displayMessage('<font color="#000000" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
 				
 			} 
 			catch (e:Error)
 			{
-				
+				trace("[onMessage] Error: " + e);
 			}
 		}
 		
@@ -392,6 +413,7 @@ package
 		//********************************
 		//credit to skyboy
 		public function displayMessage(message:String):void {
+			trace("[displayMessage()] Message = " + message);
 			var pos:Number = chatBox.verticalScrollPosition;
 			var snap:Boolean = (chatBox.maxVerticalScrollPosition - pos < 2)
 			chatBox.htmlText += getTimeStamp() +  message;
@@ -517,16 +539,16 @@ package
 			
 		}
 		public function getUserNameFromId(id:String):String {
-			//TODO getUserNameFromId();
-			return "UG";
+			trace("[getUserNameFromId()] ID = " + id);
+			return userManager.getName(id);
 		}
 		public function isUserMod(id:String):Boolean {
 			//TODO isUserMod
-			return false;
+			return userManager.isMod(id);
 		}
 		public function isUserAdmin(id:String):Boolean {
 			//TODO isUserAdmin
-			return false;
+			return userManager.isAdmin(id);
 		}
 		public function banUser():void {
 			//TODO banUser();

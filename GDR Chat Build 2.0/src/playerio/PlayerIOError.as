@@ -41,6 +41,10 @@ package playerio{
 		*/
 		public static const ArgumentOutOfRange:PlayerIOError = new PlayerIOError("The given argument value is outside the range of allowed values.",8);
 		/**
+		* PlayerIOError type if the game has been disabled, most likely because of missing payment.
+		*/
+		public static const GameDisabled:PlayerIOError = new PlayerIOError("The game has been disabled, most likely because of missing payment.",9);
+		/**
 		* PlayerIOError type if the game requested is not known by the server
 		*/
 		public static const UnknownGame:PlayerIOError = new PlayerIOError("The game requested is not known by the server",10);
@@ -53,9 +57,9 @@ package playerio{
 		*/
 		public static const InvalidAuth:PlayerIOError = new PlayerIOError("The auth given is invalid or malformatted",12);
 		/**
-		* PlayerIOError type if there are no servers available in the cluster, please try again later (never occurs)
+		* PlayerIOError type if there is no server in any of the selected server clusters for the game that are eligible to start a new room in (they're all at full capacity or there are no servers in any of the clusters). Either change the selected clusters for your game in the admin panel, try again later or start some more servers for one of your clusters.
 		*/
-		public static const NoAvailableServers:PlayerIOError = new PlayerIOError("There are no servers available in the cluster, please try again later (never occurs)",13);
+		public static const NoServersAvailable:PlayerIOError = new PlayerIOError("There is no server in any of the selected server clusters for the game that are eligible to start a new room in (they're all at full capacity or there are no servers in any of the clusters). Either change the selected clusters for your game in the admin panel, try again later or start some more servers for one of your clusters.",13);
 		/**
 		* PlayerIOError type if the room data for the room was over the allowed size limit
 		*/
@@ -65,9 +69,9 @@ package playerio{
 		*/
 		public static const RoomAlreadyExists:PlayerIOError = new PlayerIOError("You are unable to create room because there is already a room with the specified id",15);
 		/**
-		* PlayerIOError type if the game you're connected to does not have a server type with the specified name
+		* PlayerIOError type if the game you're connected to does not have a room type with the specified name
 		*/
-		public static const UnknownServerType:PlayerIOError = new PlayerIOError("The game you're connected to does not have a server type with the specified name",16);
+		public static const UnknownRoomType:PlayerIOError = new PlayerIOError("The game you're connected to does not have a room type with the specified name",16);
 		/**
 		* PlayerIOError type if there is no room running with that id
 		*/
@@ -84,6 +88,14 @@ package playerio{
 		* PlayerIOError type if the key you specified is not set as searchable. You can change the searchable keys in the admin panel for the server type
 		*/
 		public static const NotASearchColumn:PlayerIOError = new PlayerIOError("The key you specified is not set as searchable. You can change the searchable keys in the admin panel for the server type",20);
+		/**
+		* PlayerIOError type if the server could not complete the heartbeat
+		*/
+		public static const HeartbeatFailed:PlayerIOError = new PlayerIOError("The server could not complete the heartbeat",40);
+		/**
+		* PlayerIOError type if the game code is invalid
+		*/
+		public static const InvalidGameCode:PlayerIOError = new PlayerIOError("The game code is invalid",41);
 		/**
 		* PlayerIOError type if the QuickConnect method (simple, facebook, kongregate...) is not enabled for the game. You can enable the various methods in the admin panel for the game
 		*/
@@ -140,6 +152,38 @@ package playerio{
 		* PlayerIOError type if cannot create circular references inside database objects
 		*/
 		public static const CircularReference:PlayerIOError = new PlayerIOError("Cannot create circular references inside database objects",34);
+		/**
+		* PlayerIOError type if cannot access coins or items before vault has been loaded. Please refresh the vault first.
+		*/
+		public static const VaultNotLoaded:PlayerIOError = new PlayerIOError("Cannot access coins or items before vault has been loaded. Please refresh the vault first.",50);
+		/**
+		* PlayerIOError type if there is no PayVault provider with the specified id
+		*/
+		public static const UnknownPayVaultProvider:PlayerIOError = new PlayerIOError("There is no PayVault provider with the specified id",51);
+		/**
+		* PlayerIOError type if the specified PayVault provider does not support direct purchase
+		*/
+		public static const DirectPurchaseNotSupportedByProvider:PlayerIOError = new PlayerIOError("The specified PayVault provider does not support direct purchase",52);
+		/**
+		* PlayerIOError type if the specified PayVault provider does not support buying coins
+		*/
+		public static const BuyingCoinsNotSupportedByProvider:PlayerIOError = new PlayerIOError("The specified PayVault provider does not support buying coins",54);
+		/**
+		* PlayerIOError type if the user does not have enough coins in the PayVault to complete the purchase or debit.
+		*/
+		public static const NotEnoughCoins:PlayerIOError = new PlayerIOError("The user does not have enough coins in the PayVault to complete the purchase or debit.",55);
+		/**
+		* PlayerIOError type if the item does not exist in the vault.
+		*/
+		public static const ItemNotInVault:PlayerIOError = new PlayerIOError("The item does not exist in the vault.",56);
+		/**
+		* PlayerIOError type if the chosen provider rejected one or more of the purchase arguments
+		*/
+		public static const InvalidPurchaseArguments:PlayerIOError = new PlayerIOError("The chosen provider rejected one or more of the purchase arguments",57);
+		/**
+		* PlayerIOError type if the chosen provider is not configured correctly in the admin panel
+		*/
+		public static const InvalidPayVaultProviderSetup:PlayerIOError = new PlayerIOError("The chosen provider is not configured correctly in the admin panel",58);
 		/**
 		* @private
 		*/

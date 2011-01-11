@@ -24,6 +24,7 @@ namespace MyGame {
         }
 
 	}
+    [RoomType("TicTacToe")]
 	public class GameCode : Game<Player> {
 			
 		
@@ -41,46 +42,9 @@ namespace MyGame {
 			Console.WriteLine("RoomId: " + RoomId);
 		}
 
-        public override bool AllowUserJoin(Player player)
-        {
-            /*
-            foreach (Player t in Players)
-            {
-                Console.WriteLine("Player = " + t.JoinData["Name"]);
-
-                if (t.JoinData["Name"] == player.JoinData["Name"])
-                {
-                    Console.WriteLine("Denied Player = " + player.JoinData["Name"]);
-                    player.Disconnect();
-                }
-            }*/
-             
-            return base.AllowUserJoin(player);
-            
-        }
-
 		// This method is called whenever a player joins the game
-		public override void UserJoined(Player player) {
-
-            
-            if (player.JoinData["Name"] != "UnknownGuardian")
-            {
-                int count = 0;
-                foreach (Player t in Players)
-                {
-                    if (t.JoinData["Name"] == player.JoinData["Name"])
-                    {
-                        count++;
-                        if (count >= 2)
-                        {
-                            Console.WriteLine("UserLeft Message prevented on Player = " + player.JoinData["Name"]);
-                            player.Disconnect();
-                            return; //already found twice, so disconnect without sending join message
-                        }
-                    }
-                }
-            }
-            
+		public override void UserJoined(Player player)
+        {
             
             //if the player is new
             if (!player.PlayerObject.Contains("Color"))
@@ -119,25 +83,8 @@ namespace MyGame {
 		// This method is called when a player leaves the game
 		public override void UserLeft(Player player) {
 			//Tell the chat that the player left.
-            
-            bool stillExists = false; //for players that tried a new tab
-            if (player.JoinData["Name"] != "UnknownGuardian")
-            {
-                foreach (Player t in Players)
-                {
-                    if (t.JoinData["Name"] == player.JoinData["Name"])
-                    {
-                        Console.WriteLine("UserLeft Message prevented on Player = " + player.JoinData["Name"]);
-                        stillExists = true;
-                    }
-                }
-            }
 
-            
-            if (!stillExists)
-            {
-                Broadcast("ChatLeft", player.Id);
-            }
+            Broadcast("ChatLeft", player.Id);
 			
 			Console.WriteLine("User left the chat " + player.Id);
 

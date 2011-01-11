@@ -158,6 +158,22 @@
 			loadAPICallback = callback;
 		}
 		
+		/**
+		 * reloadAPI
+		 * @description		reloads the API. Call this if you want to regather all data
+		 * @param			e: event passed ffrom the loader's contentloaderinfo's event listener upon load completion
+		 */
+		public static function reloadAPI():void
+		{
+			services.connect();
+			
+			//extract basic data.
+			isGuest = services.isGuest();
+			userName = services.getUsername();
+			try	{ userId = services.getUserId(); } catch (e:Error) { } //local cannot load user id
+			userToken = services.getGameAuthToken();
+		}
+		
 		
 		/**
 		 * loadedAPI
