@@ -24,6 +24,7 @@
 	{
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
+		public static var playerList:PlayerList;
 		
 		public static var client:Client;
 		public static var connection:Connection
@@ -39,6 +40,25 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
+			//var p:Player = new Player();
+			//addChild(p);
+			
+			/*
+			var b:BackUserList = new BackUserList();
+			b.x = 5;
+			b.y = 65;
+			addChild(b);
+			
+			var pl:PlayerList = new PlayerList();
+			b.addChild(pl);
+			pl.addPlayer(new Player());
+			pl.addPlayer(new Player());
+			*/
+			
+			run();
+		}
+		public function run():void
+		{
 			setStageProperties();
 			createDebugField();
 			checkSiteLock();
@@ -190,7 +210,6 @@
 			TextEffect.add("\n");
 			
 			client = _client;
-			
 			client.multiplayer.createJoinRoom(
 				"gdrroom",											//Room id. If set to null a random roomid is used
 				"TicTacToe",										//The game type started on the server
@@ -224,18 +243,24 @@
 			connection.addMessageHandler("ChatLeft", onLeave);
 			connection.addMessageHandler("ChatMessage", onMessage)
 			trace("[Main][handleJoin] Connection = " + _connection);
+			
+			initChatManagers();
 		}
 		public function tweenFieldOut():void
 		{
 			stage.frameRate = 60;
-			TweenLite.to(debugField, 1, { delay:1, y: -550, ease:Quint.easeInOut, onComplete:initChatManagers } );
+			TweenLite.to(debugField, 1, { delay:1, y: -550, ease:Quint.easeInOut, onComplete:lowerFrameRate } );
 		}
 		public function initChatManagers():void
-		{
-			stage.frameRate = 30;
-			
+		{			
 			chatDisplay = new ChatDisplay();
 			stage.addChild(chatDisplay);
+			stage.swapChildren(debugField, chatDisplay);
+		}
+		
+		public function lowerFrameRate():void
+		{
+			stage.frameRate = 30;
 		}
 
 			/*
@@ -284,24 +309,28 @@
 		public static function onInit(m:Message, id:String):void
 		{
 			trace("[Main] onInit");
+			chatDisplay.onInit(m, id);
 		}
 		public static function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{ 
 			trace("[Main] onJoin");
+			chatDisplay.onJoin(m, id, name, type, color, status);
 		}
 		public static function onLeave(m:Message, id:String):void
 		{
 			trace("[Main] onLeave");
+			chatDisplay.onLeave(m, id);
 		}
 		public static function onMessage(m:Message = null, id:String = "", message:String = ""):void
 		{
 			trace("[Main] onMessage");
+			chatDisplay.onMessage(m, id, message);
 		}
 		
 		
 		//util methods
 		public function getHighestUserType():String	{
-			if(Kong.isAdmin)
+			if(Kong.isAdmin || Kong.userName == "UnknownGuardian")
 				return "Admin";
 			if(Kong.isMod)
 				return "Mod";
@@ -310,7 +339,7 @@
 			return "Reg";
 		}
 		public function getTypeColor():String {
-			if(Kong.isAdmin)
+			if(Kong.isAdmin || Kong.userName == "UnknownGuardian")
 				return "0xCC0033";
 			if(Kong.isMod)
 				return "0xD77A41";

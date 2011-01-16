@@ -25,10 +25,8 @@ package
 		
 		public var inputBox:TextInput;
 		
-		public var userManager:UserManager;
-		
 		private var soundMuted:Boolean = false;
-		private var userIsSilenced:Boolean = false;
+		//private var userIsSilenced:Boolean = false;
 		private var userLostFocus:Boolean = false;
 		private var timeOfLastMessage:int = 0;
 		private var minMessageInverval:int = 1250;
@@ -45,7 +43,7 @@ package
 			createUserList();
 			createLinksList();
 			createChatBox();
-			connectToPlayerIO();
+			//connectToPlayerIO();
 			createBorders();
 			createHeader();
 			createTabs();
@@ -59,10 +57,10 @@ package
 			b.y = 65;
 			addChild(b);
 			
-			userManager = new UserManager(this);
-			userManager.x = b.x;
-			userManager.y = b.y;
-			addChild(userManager);
+			Main.playerList = new PlayerList();
+			Main.playerList.x = 5;
+			Main.playerList.y = 65;
+			addChild(Main.playerList);
 		}
 		public function createLinksList():void
 		{
@@ -100,7 +98,6 @@ package
 			chatBox.addEventListener(FocusEvent.FOCUS_OUT, changeFocus,false,9001);
 			chatBox.addEventListener(FocusEvent.FOCUS_OUT, changeFocusAgain, false, -9001);
 			chatBox.drawFocus(false);
-			chatBox.text = "This is the chat box";
 			addChild(chatBox);
 		}
 		public function createBorders():void
@@ -184,10 +181,24 @@ package
 		//*********************************
 		//*  client and server functions  *
 		//*********************************
-		private function onInit(m:Message, id:String):void
+		public function onInit(m:Message, id:String):void
 		{
 			//handle user scroll box
-			userManager.onInit(m, id);	
+			/////////////userManager.onInit(m, id);	
+			var p:Player;
+			for ( var a:int = 1; a < m.length; a += 5)
+			{
+				var _id:String = m.getString(a);
+				var _name:String = m.getString(a+1);
+				var _type:String = m.getString(a + 2);
+				var _color:String = m.getString(a + 3);
+				var _status:String = m.getString(a + 4);
+				p = new Player(_id, _name, _type, _color, _status);
+				Main.playerList.addPlayer(p);
+				//////////////addUser(m.getString(a), m.getString(a + 1), m.getString(a + 2), m.getString(a + 3), m.getString(a + 4))
+			}
+			
+			
 			trace("[ChatDisplay][onInit] m = " + m + ", id = " + id);
 			
 			if (chatBox.htmlText.length < 100)
@@ -196,23 +207,33 @@ package
 				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
 			}
 		}
-		private function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
+		public function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{
 			//handle user scroll box
 			trace("[ChatDisplay][onJoin] m = " + m + ", id = " + id + ", name = " + name + ", type = " + type +", color = " + color + ", status = " + status);
-			userManager.onJoin(m, id, name, type, color, status);
-			displayEvent("join", name);
+			///////////////userManager.onJoin(m, id, name, type, color, status);
+			if (Main.playerList.getPlayerFromID(id) == null)
+			{
+				var p:Player = new Player(id, name, type, color, status);
+				Main.playerList.addPlayer(p);
+				displayEvent("join", name);
+			}
+			else
+			{
+				trace("[ChatDisplay][onJoin] Duplicate player found");
+			}
 		}
-		private function onLeave(m:Message, id:String):void
+		public function onLeave(m:Message, id:String):void
 		{
 			trace("[ChatDisplay][onLeave] m = " + m + ", id = " + id);
 			displayEvent("leave", getUserNameFromId(id));
-			userManager.onLeave(m, id);
+			Main.playerList.removePlayerFromID(id);
+			/////////////userManager.onLeave(m, id);
 		}
 		public function sendMessage(m:String):void
 		{
 			trace("[ChatDisplay][sendMessage] m = " + m);
-			if (userIsSilenced) //don't send if silenced
+			if (Main.playerList.getPlayerFromName(Kong.userName).Status == "Silenced") //don't send if silenced
 			{
 				inputBox.text = "You cannot chat while silenced";
 				return;
@@ -257,12 +278,15 @@ package
 				return;
 			}
 			
-			
-			if (m.indexOf("/silenceUser ") == 0 && !(isUserMod(Kong.userId) || isUserAdmin(Kong.userId))) //if a non mod tries to silence
+			if (m.indexOf("/silenceUser ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
 			{
 				return;
 			}
-			if (m.indexOf("/adminBan ") == 0 && !isUserAdmin(Kong.userId)) //if a non mod tries to silence
+			if (m.indexOf("/unsilenceUser ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
+			{
+				return;
+			}
+			if (m.indexOf("/adminBan ") == 0 && !isUserAdmin(Kong.userName)) //if a non mod tries to silence
 			{
 				return;
 			}
@@ -297,7 +321,8 @@ package
 				{
 					if (message.indexOf("/silenceUser " + Kong.userName) == 0)
 					{
-						userIsSilenced = true;
+						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
+						//userIsSilenced = true;
 					}
 					else if ((message.indexOf("/silenceUser !kickAll!") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
 					{
@@ -313,11 +338,27 @@ package
 					return;
 				}
 				
+				if (message.indexOf("/unsilenceUser ") == 0) //silencing a user. 2 cases. 1) Silence this. 2) Display silence.
+				{
+					if (message.indexOf("/unsilenceUser " + Kong.userName) == 0)
+					{
+						//userIsSilenced = false;
+						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("unsilence");
+					}
+					else
+					{
+						words = message.split(" ", 2); //split the message with spaces
+						displayEvent("unsilenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+					}
+					return;
+				}
+				
 				if (message.indexOf("/adminBan") == 0) //banning a user. 1) Bans this. 2) Display Ban.
 				{
 					if (message.indexOf("/adminBan " + Kong.userName) == 0)
 					{
-						userIsSilenced = true;
+						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
+						//userIsSilenced = true;
 						banUser();
 					}
 					else
@@ -436,6 +477,9 @@ package
 				case "silenced":
 					displayMessage('<font color="#C0C0C0" size="12">[' + n + " silenced]</font>");
 					break;
+				case "unsilenced":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " unsilenced]</font>");
+					break;
 				case "banned":
 					displayMessage('<font color="#C0C0C0" size="12">[' + n + " banned]</font>");
 					break;
@@ -540,18 +584,22 @@ package
 		}
 		public function getUserNameFromId(id:String):String {
 			trace("[getUserNameFromId()] ID = " + id);
-			return userManager.getName(id);
+			//return userManager.getName(id);
+			return Main.playerList.getPlayerFromID(id).UserName;
 		}
-		public function isUserMod(id:String):Boolean {
+		public function isUserMod(_name:String):Boolean {
 			//TODO isUserMod
-			return userManager.isMod(id);
+			//return userManager.isMod(id);
+			return Main.playerList.getPlayerFromName(_name).Type == "Mod"
 		}
-		public function isUserAdmin(id:String):Boolean {
+		public function isUserAdmin(_name:String):Boolean {
 			//TODO isUserAdmin
-			return userManager.isAdmin(id);
+			//return userManager.isAdmin(id);
+			return Main.playerList.getPlayerFromName(_name).Type == "Admin"
 		}
 		public function banUser():void {
 			//TODO banUser();
+			//Disconenct player
 		}
 		
 	}
