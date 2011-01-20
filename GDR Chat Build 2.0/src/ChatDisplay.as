@@ -590,12 +590,24 @@ package
 		public function isUserMod(_name:String):Boolean {
 			//TODO isUserMod
 			//return userManager.isMod(id);
-			return Main.playerList.getPlayerFromName(_name).Type == "Mod"
+			var p:Player = Main.playerList.getPlayerFromName(_name)
+			if (p)
+			{
+				return p.Type == "Mod";
+			}
+			return false;
+			//return Main.playerList.getPlayerFromName(_name).Type == "Mod"
 		}
 		public function isUserAdmin(_name:String):Boolean {
 			//TODO isUserAdmin
 			//return userManager.isAdmin(id);
-			return Main.playerList.getPlayerFromName(_name).Type == "Admin"
+			var p:Player = Main.playerList.getPlayerFromName(_name)
+			if (p)
+			{
+				return p.Type == "Admin";
+			}
+			return false;
+			//return Main.playerList.getPlayerFromName(_name).Type == "Admin"
 		}
 		public function banUser():void {
 			//TODO banUser();

@@ -62,7 +62,7 @@
 			setStageProperties();
 			createDebugField();
 			checkSiteLock();
-			connectToKongregate();
+			//////////////////////connectToKongregate();////////////////////////
 		}
 		
 		public function setStageProperties():void
@@ -111,6 +111,7 @@
 			{
 				TextEffect.add("Site Accepted...............");
 				TextEffect.add("\n");
+				connectToKongregate();
 			}
 			else
 			{
@@ -156,6 +157,13 @@
 			TextEffect.add("\n");
 			TextEffect.add("ID: " + Kong.userId);
 			TextEffect.add("\n");
+			TextEffect.add("Fetching User Info.........");
+			TextEffect.add("\n");
+			Kong.getPlayerInfo(grabbedKongUserData);
+			///////////grabbedKongUserData(); ////////////////////////////////////////////////////////////////
+		}
+		public function grabbedKongUserData():void
+		{
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
 			TextEffect.add("Connecting to Server.....");
@@ -200,9 +208,9 @@
 		
 		public function connectedToPlayerIO(_client:Client):void
 		{
-			TextEffect.addGroup("Connected..................");
+			TextEffect.addGroup("Connected....................");
 			TextEffect.add("\n");
-			TextEffect.addGroup("Joining Room................");
+			TextEffect.addGroup("Joining Room.................");
 			TextEffect.add("\n");
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
@@ -227,7 +235,7 @@
 		}		
 		public function handleJoin(_connection:Connection):void
 		{
-			TextEffect.add("Joined Room..............");
+			TextEffect.add("Joined Room................");
 			TextEffect.add("\n");
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
@@ -330,6 +338,7 @@
 		
 		//util methods
 		public function getHighestUserType():String	{
+			trace("[Main][getHighestUserType()] ", Kong.isAdmin, Kong.isMod, Kong.isDev, Kong.isForumMod, Kong.isCurator, Kong.userName);
 			if(Kong.isAdmin || Kong.userName == "UnknownGuardian")
 				return "Admin";
 			if(Kong.isMod)
