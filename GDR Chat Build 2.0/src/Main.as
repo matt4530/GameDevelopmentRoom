@@ -56,7 +56,9 @@
 			*/
 			
 			run();
+			
 		}
+		
 		public function run():void
 		{
 			setStageProperties();
@@ -271,35 +273,6 @@
 			stage.frameRate = 30;
 		}
 
-			/*
-			//Add chat to game
-			_chat = new Chat(connection);
-			stage.addChild(_chat);
-			TweenLite.from(_chat,2,{alpha:0});
-			
-			_linkContainer = new LinkContainer();
-			stage.addChild(_linkContainer);
-			
-			//_userContainer = new UserContainer(connection);
-			//stage.addChild(_userContainer);
-			
-			_pasteBin = new PasteBin(stage,_client,connection);
-			_pasteBin.name = "PasteBin";
-			
-			_links = new LinksTab();
-			stage.addChild(_links);
-			
-			_betaTab = new BetaTab(_client,connection);
-			_betaTab.name = "BetaTab";
-			stage.addChild(_betaTab);
-			
-			if (!SiteLock.isLocal())
-			{
-				_chatInputManager = new ChatInputManager();
-			}
-				
-			startTimers();
-			*/
 		public function handleJoinError(error:PlayerIOError):void
 		{
 			TextEffect.add("[Main][handleJoinError][PlayerIOError] " + error);
@@ -335,25 +308,28 @@
 			chatDisplay.onMessage(m, id, message);
 		}
 		
-		
 		//util methods
-		public function getHighestUserType():String	{
+		public static function getHighestUserType():String	{
+			var n:String = Kong.userName;
+			
 			trace("[Main][getHighestUserType()] ", Kong.isAdmin, Kong.isMod, Kong.isDev, Kong.isForumMod, Kong.isCurator, Kong.userName);
-			if(Kong.isAdmin || Kong.userName == "UnknownGuardian")
+			if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
 				return "Admin";
-			if(Kong.isMod)
+			if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
 				return "Mod";
 			if(Kong.isDev)
 				return "Dev";
 			return "Reg";
 		}
-		public function getTypeColor():String {
-			if(Kong.isAdmin || Kong.userName == "UnknownGuardian")
+		public static function getTypeColor():String {
+			var n:String = Kong.userName;
+			
+			if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
 				return "0xCC0033";
-			if(Kong.isMod)
+			if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
 				return "0xD77A41";
 			if(Kong.isDev)
-				return "0x0098FFF";
+				return "0x0098FF";
 			return "0x000000";
 		}
 	}

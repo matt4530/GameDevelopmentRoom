@@ -64,8 +64,8 @@ package
 				if (players[i].ID == id)
 				{
 					var p:Player = players[i];
-					p.parent.removeChild(p);
 					players.splice(i, 1);
+					p.remove();
 					redisplay();
 					return;
 				}
@@ -99,7 +99,15 @@ package
 		public function removePlayer(p:Player):void
 		{
 			players.splice(players.indexOf(p), 1);
-			p.parent.removeChild(p);
+			p.remove();
+			redisplay();
+		}
+		public function removeAllPlayers():void
+		{
+			while (players.length > 0)
+			{
+				players.pop().remove();
+			}
 			redisplay();
 		}
 		public function redisplay():void

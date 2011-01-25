@@ -1,6 +1,7 @@
 package  
 {
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.net.navigateToURL;
 	import flash.net.URLRequest;
@@ -29,7 +30,7 @@ package
 			UserName = n;// "CAKE-" + String.fromCharCode(int(Math.random() * 16) + 64);
 			Type = t;// Math.random() > 0.5 ? "Dev" : Math.random() > 0.5 ? "Mod" : Math.random() > 0.5 ? "Admin" : "Reg";
 			Status = s;
-			Color = c;
+			//Color = c;
 			
 			field = new TextField();
 			field.defaultTextFormat = new TextFormat("Arial", field.width > 230 ? 14 : 16, 0x000000, true);
@@ -51,6 +52,7 @@ package
 				icon.x = 220;
 				icon.y = 10;
 				addChild(icon);
+				Color = "0xD77A41";
 			}
 			else if (Type == "Reg")
 			{
@@ -65,12 +67,27 @@ package
 				icon.x = 220;
 				icon.y = 10;
 				addChild(icon);
+				Color = "0xCC0033";
 			}
+			if (Status == "AFK")
+			{
+				setToAFK();
+			}
+			
+			addEventListener(Event.ADDED_TO_STAGE, init);
+			
+			addEventListener(MouseEvent.ROLL_OVER, rOver);
+			addEventListener(MouseEvent.ROLL_OUT, rOut);
+		}
+		public function init(e:Event):void
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, init);
 			
 			//if(UserName == Kong.userName && (Type == "Mod" || Type == "Admin"))
 			trace("[Player][init] " + Kong.userName + Main.chatDisplay.isUserAdmin(Kong.userName) + Main.chatDisplay.isUserMod(Kong.userName) );
-			
-			if ((UserName == Kong.userName && (Type == "Mod" || Type == "Admin")) || (Main.chatDisplay.isUserAdmin(Kong.userName) || Main.chatDisplay.isUserMod(Kong.userName)) )
+			//(UserName == Kong.userName && (Type == "Mod" || Type == "Admin"))||
+			trace("[Player][init][indexOf] = " + Main.playerList.players);
+			if (  (Main.chatDisplay.isUserAdmin(Kong.userName) || Main.chatDisplay.isUserMod(Kong.userName)) )
 			{
 				silenceIcon = new UserSilenceToggle();
 				silenceIcon.x = 205 - silenceIcon.width - 2;
@@ -83,6 +100,7 @@ package
 			}
 			
 			field.addEventListener(MouseEvent.CLICK, gotoProfile);
+			
 		}
 		
 		public function toggleSilencePlayer(e:MouseEvent = null):void
@@ -90,16 +108,16 @@ package
 			//TODO don't toggle or even show if user is not a mod admin
 			if (Status == "Silenced")
 			{
-				Status = "AFK";
-				silenceIcon.alpha = 0.3;
-				silenceIcon.x = 205 - silenceIcon.width - 2;
+				//Status = "AFK";
+				//silenceIcon.alpha = 0.3;
+				//silenceIcon.x = 205 - silenceIcon.width - 2;
 				Main.chatDisplay.sendMessage("/unsilenceUser " + UserName);
 			}
 			else
 			{
-				Status = "Silenced";
-				silenceIcon.alpha = 1;
-				silenceIcon.x = 205;
+				//Status = "Silenced";
+				//silenceIcon.alpha = 1;
+				//silenceIcon.x = 205;
 				Main.chatDisplay.sendMessage("/silenceUser " + UserName);
 			}
 		}
@@ -108,11 +126,13 @@ package
 		{
 			if (m == "unsilence")
 			{
+				Status = "AFK";
 				silenceIcon.alpha = 0.3;
 				silenceIcon.x = 205 - silenceIcon.width - 2;
 			}
 			else
 			{
+				Status = "Silenced";
 				silenceIcon.alpha = 1;
 				silenceIcon.x = 205;
 			}
@@ -126,6 +146,48 @@ package
 			}
 		}
 		
+		public function rOver(e:MouseEvent):void
+		{
+			graphics.beginFill(0x999999, 0.2);
+			graphics.drawRect(0, 0, width + 4, height);
+			graphics.endFill();
+		}
+		public function rOut(e:MouseEvent):void
+		{
+			graphics.clear();
+		}
+		
+		public function setToAFK():void
+		{
+			field.textColor = 0x909090;
+			Status = "AFK";
+		}
+		public function setToBack():void
+		{
+			field.textColor = 0x000000;
+			Status = "Norm";
+		}
+		
+		public function setColor(c:String):void
+		{
+			Color = c;
+		}
+		
+		public function remove():void
+		{
+			removeEventListener(MouseEvent.ROLL_OVER, rOver);
+			removeEventListener(MouseEvent.ROLL_OUT, rOut);
+			field.removeEventListener(MouseEvent.CLICK, gotoProfile);
+			if (silenceIcon)
+			{
+				silenceIcon.removeEventListener(MouseEvent.CLICK, toggleSilencePlayer);
+			}
+			while (numChildren > 0)
+			{
+				removeChildAt(0);
+			}
+			parent.removeChild(this);
+		}
 	}
 
 }

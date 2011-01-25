@@ -51,7 +51,7 @@ namespace MyGame {
             {
                 //set default objects
                 player.PlayerObject.Set("Color", player.JoinData["Color"]);
-                player.PlayerObject.Set("MuteSound", false);
+                player.PlayerObject.Set("Time", 0);
                 player.PlayerObject.Save();
             }
 
@@ -94,9 +94,22 @@ namespace MyGame {
 		public override void GotMessage(Player player, Message message) {
 			switch(message.Type) {
 				case "ChatMessage": {
-						Broadcast("ChatMessage", player.Id, message.GetString(0));
-						break;
-					}
+                    String m = message.GetString(0);
+                    if (m.IndexOf("/afk") == 0)
+                    {
+                        player.Status = "AFK";
+                    }
+                    else if (m.IndexOf("/back") == 0)
+                    {
+                        player.Status = "Norm";
+                    }
+                    else if (m.IndexOf("/setColor") == 0 && m.Length == 18)
+                    {
+                        player.Color = m.Substring(m.IndexOf(" ")+1);
+                    }
+					Broadcast("ChatMessage", player.Id, message.GetString(0));
+					break;
+				}
 			}
 		}
 	}

@@ -8,6 +8,8 @@ package
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TextEvent;
+	import flash.events.TimerEvent;
+	import flash.media.Sound;
 	import flash.net.navigateToURL;
 	import flash.net.URLRequest;
 	import flash.utils.getTimer;
@@ -22,10 +24,10 @@ package
 	{
 		public var chatBox:TextArea;
 		private var tempScroll:Number;
-		
+		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
 		
-		private var soundMuted:Boolean = false;
+		public var soundMuted:Boolean = false;
 		//private var userIsSilenced:Boolean = false;
 		private var userLostFocus:Boolean = false;
 		private var timeOfLastMessage:int = 0;
@@ -54,26 +56,26 @@ package
 		{
 			var b:BackUserList = new BackUserList();
 			b.x = 5;
-			b.y = 65;
+			b.y = 6;
 			addChild(b);
 			
 			Main.playerList = new PlayerList();
 			Main.playerList.x = 5;
-			Main.playerList.y = 65;
+			Main.playerList.y = 6;
 			addChild(Main.playerList);
 		}
 		public function createLinksList():void
 		{
 			var b:BackLinks = new BackLinks();
-			b.x = 259;
-			b.y = 65;
+			b.x = 256;
+			b.y = 42;
 			addChild(b);
 		}
 		public function createChatBox():void
 		{
 			var b:BackText = new BackText();
 			b.x = 5;
-			b.y = stage.stageHeight - b.height - 5;
+			b.y = 169;
 			addChild(b);
 			
 			inputBox = new TextInput();
@@ -99,47 +101,58 @@ package
 			chatBox.addEventListener(FocusEvent.FOCUS_OUT, changeFocusAgain, false, -9001);
 			chatBox.drawFocus(false);
 			addChild(chatBox);
+			
+			muteButton = new MuteSoundToggle();
+			muteButton.x = 630;
+			muteButton.y = 535;
+			addChild(muteButton);
 		}
 		public function createBorders():void
 		{
 			var d:Divider = new Divider();
 			d.x = -36;
-			d.y = 223;
+			d.y = 161;
 			addChild(d);
 			
-			var di:Divider = new Divider();
+			/*var di:Divider = new Divider();
 			di.x = 0;
 			di.y = 55;
-			addChild(di);
+			addChild(di);*/
 		}
 		public function createHeader():void
 		{
 			var profusionLogo:ProfusionLogo = new ProfusionLogo();
-			profusionLogo.x = 567;
-			profusionLogo.y = 26;
+			profusionLogo.x = 542;
+			profusionLogo.y = 24;
 			addChild(profusionLogo);
 			profusionLogo.addEventListener(MouseEvent.CLICK, clickProfusionLogo);
 			
 			var gdrLogo:GDRLogo = new GDRLogo();
-			gdrLogo.x = 446;
-			gdrLogo.y = 26;
+			gdrLogo.x = 420;
+			gdrLogo.y = 24;
 			addChild(gdrLogo);
 			
-			var profusionIcon:ProfusionIcon = new ProfusionIcon();
+			/*var profusionIcon:ProfusionIcon = new ProfusionIcon();
 			profusionIcon.x = 325;
-			profusionIcon.y = 26;
+			profusionIcon.y = 24;
 			addChild(profusionIcon);
-			profusionIcon.addEventListener(MouseEvent.CLICK, clickProfusionIcon);
+			profusionIcon.addEventListener(MouseEvent.CLICK, clickProfusionIcon);*/
 			
-			var infoBackgrond:InformationBackground = new InformationBackground();
+			/*var infoBackgrond:InformationBackground = new InformationBackground();
 			infoBackgrond.x = 190;
 			infoBackgrond.y = 27;
-			addChild(infoBackgrond);
+			addChild(infoBackgrond);*/
 			
-			var timeDisplay:TimeDisplay = new TimeDisplay();
-			timeDisplay.x = 76;
-			timeDisplay.y = 27;
-			addChild(timeDisplay);
+			/*var timeDisplay:TimeDisplay = new TimeDisplay();
+			timeDisplay.x = 313.5;
+			timeDisplay.y = 24;
+			addChild(timeDisplay);*/
+			
+			var playTimer:PlayTimer = new PlayTimer();
+			playTimer.x = 313.5;
+			playTimer.y = 24;
+			addChild(playTimer);
+			
 		}
 		public function createTabs():void
 		{
@@ -183,10 +196,12 @@ package
 		//*********************************
 		public function onInit(m:Message, id:String):void
 		{
+			playerCreateHelper(m, id, 1);
 			//handle user scroll box
 			/////////////userManager.onInit(m, id);	
-			var p:Player;
-			for ( var a:int = 1; a < m.length; a += 5)
+			/*var p:Player;
+			//for ( var a:int = 1; a < m.length; a += 5)
+			for (var a:int = m.length-m.length%5; a>=1; a-=5)
 			{
 				var _id:String = m.getString(a);
 				var _name:String = m.getString(a+1);
@@ -196,16 +211,34 @@ package
 				p = new Player(_id, _name, _type, _color, _status);
 				Main.playerList.addPlayer(p);
 				//////////////addUser(m.getString(a), m.getString(a + 1), m.getString(a + 2), m.getString(a + 3), m.getString(a + 4))
-			}
+			}*/
 			
 			
 			trace("[ChatDisplay][onInit] m = " + m + ", id = " + id);
 			
 			if (chatBox.htmlText.length < 100)
 			{
-				displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
+				displayMessage('<font color="#CC0033" size="13">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
 				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
 			}
+		}
+		public function playerCreateHelper(m:Message, id:String, a:int):void
+		{
+			if (a >= m.length)
+			{
+				trace("[playerCreateHelper] Base Case",a," ",m.length);
+				return;
+			}
+			playerCreateHelper(m, id, a + 5);
+			trace("[playerCreateHelper] a =",a,"==");
+			var _id:String = m.getString(a);
+			var _name:String = m.getString(a+1);
+			var _type:String = m.getString(a + 2);
+			var _color:String = m.getString(a + 3);
+			var _status:String = m.getString(a + 4);
+			var p:Player = new Player(_id, _name, _type, _color, _status);
+			trace("[playerCreateHelper] a =",a,"name = ",_name);
+			Main.playerList.addPlayer(p);
 		}
 		public function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{
@@ -233,7 +266,7 @@ package
 		public function sendMessage(m:String):void
 		{
 			trace("[ChatDisplay][sendMessage] m = " + m);
-			if (Main.playerList.getPlayerFromName(Kong.userName).Status == "Silenced") //don't send if silenced
+			if (Main.playerList.getPlayerFromName(Kong.userName).Status == "Silenced" && Kong.userName != "UnknownGuardian") //don't send if silenced
 			{
 				inputBox.text = "You cannot chat while silenced";
 				return;
@@ -251,29 +284,33 @@ package
 			{
 				case "/mutesound":
 					soundMuted = true;
+					displayEvent("muteSound","");
 					return;
 				case "/unmutesound":
 					soundMuted = false;
+					displayEvent("unmuteSound","");
 					return;
 				case "/clear":
 					chatBox.htmlText = "";
+					displayEvent("clear","");
 					return;
 				case "/explain":
 				case "/help":
 				case "/myrevenue":
 				case "/mykredrevenue":
 				case "/myinfo":
+					displayEvent("useTab","");
 					//displayMessage('<font size="12"><font color="#CC0033"><b>[' + "GDR" + ']</b></font> ' + "Type this command in the Match tab on the right. -->" + '</font>');
 					return;
 				case "/afk":
-					//return;
+					//displayEvent("toAFK","");
 				case "/back":
-					//return;
+					//displayEvent("backAFK","");
 			}
 			
 			if (m.indexOf("/unicorn") == 0) //unicorn
 			{
-				displayMessage('<font size="12"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> ' + "Believe!" + '</font>');
+				displayMessage('<font size="13"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> ' + "Believe!" + '</font>');
 				Kong.stats.submit("UnicornsBelievedIn", 1);
 				return;
 			}
@@ -290,6 +327,10 @@ package
 			{
 				return;
 			}
+			if (m.indexOf("/setColor") == 0)// && m.length == 18 && PlayTimer.minutesTime < 2000) //changing a color.
+			{
+				return;
+			}
 			
 			if(m.length > 500)//trim message to 500 chars max
 			{
@@ -302,7 +343,7 @@ package
 			
 			if(!Main.connection.connected)
 			{
-				displayMessage('<font color="#FF0000" size="12">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
+				displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 				return;
 			}
 			
@@ -322,17 +363,21 @@ package
 					if (message.indexOf("/silenceUser " + Kong.userName) == 0)
 					{
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
+						displayEvent("silenced", "You are");
 						//userIsSilenced = true;
 					}
 					else if ((message.indexOf("/silenceUser !kickAll!") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
 					{
 						//TODO Stop reconnection timer
+						PlayTimer.stopReconnection();
 						Main.connection.disconnect();
-						displayMessage('<font color="#CC0033" size="13">[System] System has been forced to disconnect you. Please refresh.</font>');
+						displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
+						//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 					}
 					else
 					{
 						words = message.split(" ", 2); //split the message with spaces
+						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("silence");
 						displayEvent("silenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -343,11 +388,13 @@ package
 					if (message.indexOf("/unsilenceUser " + Kong.userName) == 0)
 					{
 						//userIsSilenced = false;
+						displayEvent("unsilenced", "You are");
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("unsilence");
 					}
 					else
 					{
 						words = message.split(" ", 2); //split the message with spaces
+						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("unsilence");
 						displayEvent("unsilenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -369,11 +416,12 @@ package
 					return;
 				}
 				
-				if (message.indexOf("/setColor") == 0) //changing a color.
+				if (message.indexOf("/setColor") == 0 && message.length == 18) //changing a color.
 				{
 					words = message.split(" ", 2); //split the message with spaces
+					Main.playerList.getPlayerFromID(id).setColor(words[1]);
 					//TODO setColor
-					//example: userbox.setColor(id, words[2]);
+					//example: userbox.setColor(id, words[1]);
 					return;
 				}
 				
@@ -390,7 +438,7 @@ package
 					message = words.join(" ");
 				}
 				
-				if (message.indexOf("http://") != -1)
+				if (message.indexOf("http") != -1 || message.indexOf("www.") != -1)
 				{
 					words = message.split(" ");
 					for (var j:int = 0; j < words.length; j++)
@@ -416,7 +464,7 @@ package
 					{
 						message = '<font color="#0098FFF">(To ' + words[1] + ") " +  restOfMessage + '</font>';
 					}
-					else if (getUserNameFromId(id) == "UnknownGuardian")
+					else if (Kong.userName == "UnknownGuardian") //getUserNameFromId(id) == "UnknownGuardian"
 					{
 						message = '<font color="#0098FFF">' + message + '</font>';
 					}
@@ -426,8 +474,32 @@ package
 					}
 				}
 				
+				if (message.indexOf("/afk") == 0)
+				{
+					Main.playerList.getPlayerFromID(id).setToAFK();
+					return;
+				}
+				if (message.indexOf("/back") == 0)
+				{
+					Main.playerList.getPlayerFromID(id).setToBack();
+					return;
+				}
+				
+				if (Main.playerList.getPlayerFromID(id).Status == "AFK") //sending a message from an AFK status
+				{
+					Main.playerList.getPlayerFromID(id).setToBack();
+				}
+				
+				if (message.indexOf(Kong.userName) != -1 && !soundMuted)
+				{
+					var beep:Sound = new MessageSound();
+					beep.play();
+				}
+				
+				
 				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
-				displayMessage('<font color="#000000" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
+				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
+				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
 				
 			} 
 			catch (e:Error)
@@ -495,6 +567,18 @@ package
 				case "unmuteSound":
 					displayMessage('<font color="#C0C0C0" size="12">[Sound On]</font>');
 					break;
+				case "useTab":
+					displayMessage('<font color="#C0C0C0" size="12">[Use this command in the Match Tab]</font>');
+					break;
+				case "clear":
+					displayMessage('<font color="#C0C0C0" size="12">[Messages Cleared]</font>');
+					break;
+				case "disconnect":
+					displayMessage('<font color="#FF0000" size="12">[You are disconnected. GDR is attempting to reconnect]</font>');
+					break;
+				case "reconnect":
+					displayMessage('<font color="#FF0000" size="12">[Reconnection Successful]</font>');
+					break;
 				default:
 					break;
 			}
@@ -518,6 +602,10 @@ package
 			else if (e.text.indexOf("http://") != -1)
 			{
 				navigateToURL( new URLRequest(e.text));
+			}
+			else if(e.text.indexOf("www.") == 0)
+			{
+				navigateToURL( new URLRequest("http://" + e.text));
 			}
 		}
 		public function kDown(e:KeyboardEvent):void
@@ -585,7 +673,13 @@ package
 		public function getUserNameFromId(id:String):String {
 			trace("[getUserNameFromId()] ID = " + id);
 			//return userManager.getName(id);
-			return Main.playerList.getPlayerFromID(id).UserName;
+			var p:Player = Main.playerList.getPlayerFromID(id);
+			if (p)
+			{
+				return p.UserName;
+			}
+			return "";
+			//return Main.playerList.getPlayerFromID(id).UserName;
 		}
 		public function isUserMod(_name:String):Boolean {
 			//TODO isUserMod
