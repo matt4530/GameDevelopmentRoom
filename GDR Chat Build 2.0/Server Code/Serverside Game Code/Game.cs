@@ -110,6 +110,15 @@ namespace MyGame {
 					Broadcast("ChatMessage", player.Id, message.GetString(0));
 					break;
 				}
+                case "Time": {
+                    int time = player.PlayerObject.GetInt("Time") + 5;
+                    player.PlayerObject.Set("Time", time);
+                    player.PlayerObject.Save();
+                    Message m = Message.Create("TimeReply");
+                    m.Add(time);
+                    player.Send(m);
+                    break;
+                }
 			}
 		}
 	}

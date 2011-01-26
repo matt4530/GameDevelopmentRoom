@@ -11,6 +11,7 @@ package
 	import flash.events.TimerEvent;
 	import flash.media.Sound;
 	import flash.net.navigateToURL;
+	import flash.net.SharedObject;
 	import flash.net.URLRequest;
 	import flash.utils.getTimer;
 	import playerio.Message;
@@ -26,6 +27,7 @@ package
 		private var tempScroll:Number;
 		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
+		public var tabCode:TabCode;
 		
 		public var soundMuted:Boolean = false;
 		//private var userIsSilenced:Boolean = false;
@@ -66,10 +68,17 @@ package
 		}
 		public function createLinksList():void
 		{
+			/*
 			var b:BackLinks = new BackLinks();
 			b.x = 256;
 			b.y = 42;
 			addChild(b);
+			*/
+			var b:GITDBackLinks = new GITDBackLinks();
+			b.x = 256;
+			b.y = 42;
+			addChild(b);
+			
 		}
 		public function createChatBox():void
 		{
@@ -161,6 +170,10 @@ package
 			link.y = 127;
 			addChild(link);
 			link.addEventListener(MouseEvent.CLICK, openLinkTab);
+			
+			tabCode = new TabCode();
+			tabCode.x = stage.stageWidth;
+			addChild(tabCode);
 			
 			var code:CodeBoxIcon = new CodeBoxIcon();
 			code.x = 633;
@@ -283,10 +296,12 @@ package
 			switch(m.toLowerCase()) //to handle any special message cases
 			{
 				case "/mutesound":
+					muteButton.show("muted");
 					soundMuted = true;
 					displayEvent("muteSound","");
 					return;
 				case "/unmutesound":
+					muteButton.show("unmuted");
 					soundMuted = false;
 					displayEvent("unmuteSound","");
 					return;
@@ -668,7 +683,10 @@ package
 		}
 		public function showTab(t:String):void
 		{
-			
+			if (t == "code")
+			{
+				tabCode.handleLabelClick();
+			}
 		}
 		public function getUserNameFromId(id:String):String {
 			trace("[getUserNameFromId()] ID = " + id);
@@ -706,6 +724,9 @@ package
 		public function banUser():void {
 			//TODO banUser();
 			//Disconenct player
+			var s:SharedObject = SharedObject.getLocal("GDR");
+			s.data.cake = true;
+			s.flush();
 		}
 		
 	}

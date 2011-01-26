@@ -6,6 +6,7 @@ package
 	import flash.utils.Timer;
 	import playerio.Connection;
 	import playerio.DatabaseObject;
+	import playerio.Message;
 	import playerio.PlayerIOError;
 	import ugLabs.net.Kong;
 	/**
@@ -23,6 +24,7 @@ package
 		public function PlayTimer() 
 		{
 			serverUpdateTime = new Timer(300000, 0);
+			//serverUpdateTime = new Timer(10000, 0); //debug purposes
 			serverUpdateTime.addEventListener(TimerEvent.TIMER, updateServerTime);
 			serverUpdateTime.start();
 			
@@ -39,8 +41,17 @@ package
 
 		public function updateServerTime(e:TimerEvent):void
 		{
-			Main.client.bigDB.loadMyPlayerObject(loadedSavedData);
+			Main.connection.send("Time");
+			//Main.client.bigDB.loadMyPlayerObject(loadedSavedData);
+			timeDisplay.texbox.text = getFormattedTime(minutesTime + 5);
 		}
+		public static function showRepliedTime(m:Message = null, id:String = "", message:String = ""):void
+		{
+			trace("[PlayTimer][showRepliedTime] m = " + m);
+			minutesTime = m.getInt(0);
+			Kong.stats.submit("MinutesPlayed", minutesTime);
+		}
+		
 		public function loadedSavedData(o:DatabaseObject):void
 		{
 			if(o.Time != null)

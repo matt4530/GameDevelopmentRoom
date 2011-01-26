@@ -8,6 +8,7 @@
 	import flash.display.StageQuality;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.net.SharedObject;
 	import flash.utils.setTimeout;
 	import playerio.Client;
 	import playerio.Connection;
@@ -166,6 +167,12 @@
 		}
 		public function grabbedKongUserData():void
 		{
+			if (isBanned())
+			{
+				TextEffect.add("Denied Access...............");
+				TextEffect.add("\n");
+				return;
+			}
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
 			TextEffect.add("Connecting to Server.....");
@@ -251,7 +258,8 @@
 			connection.addMessageHandler("ChatInit", onInit)
 			connection.addMessageHandler("ChatJoin", onJoin);
 			connection.addMessageHandler("ChatLeft", onLeave);
-			connection.addMessageHandler("ChatMessage", onMessage)
+			connection.addMessageHandler("ChatMessage", onMessage);
+			connection.addMessageHandler("TimeReply", onTimeReply);
 			trace("[Main][handleJoin] Connection = " + _connection);
 			
 			initChatManagers();
@@ -307,6 +315,11 @@
 			trace("[Main] onMessage");
 			chatDisplay.onMessage(m, id, message);
 		}
+		public static function onTimeReply(m:Message = null, id:String = "", message:String = ""):void
+		{
+			trace("[Main] onTimeReply");
+			PlayTimer.showRepliedTime(m, id, message);
+		}
 		
 		//util methods
 		public static function getHighestUserType():String	{
@@ -331,6 +344,12 @@
 			if(Kong.isDev)
 				return "0x0098FF";
 			return "0x000000";
+		}
+		
+		public function isBanned():Boolean
+		{
+			var s:SharedObject = SharedObject.getLocal("GDR");
+			return (s.data.cake != undefined && s.data.cake);
 		}
 	}
 }
