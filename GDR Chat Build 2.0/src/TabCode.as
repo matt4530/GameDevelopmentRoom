@@ -90,7 +90,7 @@ package {
 			trace("[TabCode] Drawing code box");
 			
 			graphics.beginFill(0x000000,0.7);
-			graphics.drawRect(0,5,stage.stageWidth-35,stage.stageHeight);
+			graphics.drawRect(0,5,stage.stageWidth-33,stage.stageHeight);
 			graphics.endFill();
 			
 			var cou:Font = new CourierCode();
@@ -143,7 +143,7 @@ package {
 			
 			postButton = new Button();
 			postButton.label = "Post Code";
-			postButton.x = 255;
+			postButton.x = loadButton.x + loadButton.width + 5;
 			postButton.y = stage.stageHeight - 31;
 			addChild(postButton);
 			
@@ -151,7 +151,7 @@ package {
 			
 			clearButton = new Button();
 			clearButton.label = "Clear Code";
-			clearButton.x = 360;
+			clearButton.x = postButton.x + postButton.width + 5;
 			clearButton.y = stage.stageHeight - 31;
 			addChild(clearButton);
 			
@@ -160,7 +160,7 @@ package {
 			
 			highlightSyntaxButton = new Button();
 			highlightSyntaxButton.label = "Highlight Code";
-			highlightSyntaxButton.x = 470;
+			highlightSyntaxButton.x = clearButton.x + clearButton.width + 5;
 			highlightSyntaxButton.y = stage.stageHeight - 31;
 			addChild(highlightSyntaxButton);
 			

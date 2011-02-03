@@ -1,6 +1,7 @@
 ﻿package 
 {
 	import com.bit101.components.Text;
+	import com.bit101.utils.MinimalConfigurator;
 	import com.greensock.easing.Quint;
 	import com.greensock.TweenLite;
 	import flash.display.Sprite;
@@ -41,20 +42,8 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			//var p:Player = new Player();
+			///var p:PollManager = new PollManager(true);
 			//addChild(p);
-			
-			/*
-			var b:BackUserList = new BackUserList();
-			b.x = 5;
-			b.y = 65;
-			addChild(b);
-			
-			var pl:PlayerList = new PlayerList();
-			b.addChild(pl);
-			pl.addPlayer(new Player());
-			pl.addPlayer(new Player());
-			*/
 			
 			run();
 			
@@ -260,6 +249,8 @@
 			connection.addMessageHandler("ChatLeft", onLeave);
 			connection.addMessageHandler("ChatMessage", onMessage);
 			connection.addMessageHandler("TimeReply", onTimeReply);
+			connection.addMessageHandler("PollResponse", onPollResponse);
+			connection.addMessageHandler("PollCreate", onPollCreate);
 			trace("[Main][handleJoin] Connection = " + _connection);
 			
 			initChatManagers();
@@ -319,6 +310,16 @@
 		{
 			trace("[Main] onTimeReply");
 			PlayTimer.showRepliedTime(m, id, message);
+		}
+		public static function onPollResponse(m:Message = null, id:String = "", message:String = ""):void
+		{
+			trace("[Main] onPollResponse");
+			
+		}
+		public static function onPollCreate(m:Message = null, id:String = "", message:String = ""):void
+		{
+			trace("[Main] onPollCreate");
+			
 		}
 		
 		//util methods

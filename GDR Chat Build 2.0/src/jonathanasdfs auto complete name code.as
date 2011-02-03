@@ -1,4 +1,4 @@
-package  
+package
 {
 	import fl.controls.TextArea;
 	import fl.controls.TextInput;
@@ -28,7 +28,6 @@ package
 		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
 		public var tabCode:TabCode;
-		public var tabPoll:PollManager;
 		
 		public var soundMuted:Boolean = false;
 		//private var userIsSilenced:Boolean = false;
@@ -36,18 +35,21 @@ package
 		private var timeOfLastMessage:int = 0;
 		private var minMessageInverval:int = 1250;
 		
-		public function ChatDisplay() 
+		private var possibleAutocompleteNames:Array = [];
+		
+		public function ChatDisplay()
 		{
 			addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
-		public function init(e:Event ):void 
+		public function init(e:Event ):void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			
 			createUserList();
 			createLinksList();
 			createChatBox();
+			//connectToPlayerIO();
 			createBorders();
 			createHeader();
 			createTabs();
@@ -93,7 +95,9 @@ package
 			inputBox.y = b.y + b.height - inputBox.height;
 			inputBox.width = b.width;
 			inputBox.drawFocus(false);
+			inputBox.maxChars = 500;
 			inputBox.addEventListener(KeyboardEvent.KEY_DOWN, kDown);
+			inputBox.addEventListener(FocusEvent.KEY_FOCUS_CHANGE, autocompleteNickname);
 			addChild(inputBox);
 			
 			chatBox = new TextArea();
@@ -165,19 +169,9 @@ package
 		}
 		public function createTabs():void
 		{
-			var poll:PollTabIcon = new PollTabIcon();
-			poll.x = 633;
-			poll.y = 50;
-			addChild(poll);
-			poll.addEventListener(MouseEvent.CLICK, openPollTab);
-			
-			tabPoll = new PollManager(true);
-			tabPoll.x = 0;
-			addChild(tabPoll);
-			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
-			link.y = poll.y + poll.height + 12;
+			link.y = 127;
 			addChild(link);
 			link.addEventListener(MouseEvent.CLICK, openLinkTab);
 			
@@ -187,15 +181,23 @@ package
 			
 			var code:CodeBoxIcon = new CodeBoxIcon();
 			code.x = 633;
-			code.y = link.y + link.height + 4;
+			code.y = 256;
 			addChild(code);
 			code.addEventListener(MouseEvent.CLICK, openCodeTab);
 			
 			var beta:BetaTabIcon = new BetaTabIcon();
 			beta.x = 633;
-			beta.y = code.y + code.height + 4;
+			beta.y = 452;
 			addChild(beta);
 			beta.addEventListener(MouseEvent.CLICK, openBetaTab);
+		}
+		public function connectToPlayerIO():void
+		{
+			Main.connection.addMessageHandler("ChatInit", onInit)
+			Main.connection.addMessageHandler("ChatJoin", onJoin);
+			Main.connection.addMessageHandler("ChatLeft", onLeave);
+			Main.connection.addMessageHandler("ChatMessage", onMessage)
+			trace("[ChatDisplay][connectToPlayerIO] Added Init/Join/Left/Message Listeners to Connection");
 		}
 		public function addFocusEvents():void
 		{
@@ -213,7 +215,7 @@ package
 		{
 			playerCreateHelper(m, id, 1);
 			//handle user scroll box
-			/////////////userManager.onInit(m, id);	
+			/////////////userManager.onInit(m, id);
 			/*var p:Player;
 			//for ( var a:int = 1; a < m.length; a += 5)
 			for (var a:int = m.length-m.length%5; a>=1; a-=5)
@@ -349,10 +351,6 @@ package
 				return;
 			}
 			
-			if(m.length > 500)//trim message to 500 chars max
-			{
-				m = m.substring(0,500);
-			}
 			if (m == "" || m == " " || m == "  " || m == "v") //check for basic spam
 			{
 				return;
@@ -371,7 +369,7 @@ package
 		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
 		{
 			trace("[ChatDisplay][onMessage] m = " + m + ", id = " + id + ", message = " + message);
-			try 
+			try
 			{
 				var words:Array;
 				
@@ -518,7 +516,7 @@ package
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
 				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
 				
-			} 
+			}
 			catch (e:Error)
 			{
 				trace("[onMessage] Error: " + e);
@@ -603,14 +601,18 @@ package
 		public function textLink(e:TextEvent):void
 		{
 			if (e.text.indexOf("codeD") != -1)
-			{				
+			{
 				//var p:PasteBin = PasteBin(stage.getChildByName("PasteBin"));
 				//p.loadField.text = e.text;
 				//p.loadCode(null);
 			}
 			else if ( e.text.indexOf("@name") != -1)
 			{
-				inputBox.appendText( e.text.substring(e.text.indexOf("@name")+5));
+				if (inputBox.text.length == 0)
+					inputBox.text = "/w " + e.text.substring(e.text.indexOf("@name")+5);
+				else
+					inputBox.appendText(e.text.substring(e.text.indexOf("@name")+5));
+				stage.focus = inputBox;
 			}
 			else if (e.text.indexOf("@reply") != -1)
 			{
@@ -633,7 +635,39 @@ package
 			}
 		}
 		
-		
+		private function autocompleteNickname(e:FocusEvent):void
+		{
+			e.preventDefault();
+			
+			if (!possibleAutocompleteNames.length)
+			{
+				var trimmed:String = inputBox.text;
+				while (trimmed.length && trimmed.charAt(trimmed.length - 1) == " ") {
+					trimmed = trimmed.substring(0, trimmed.length - 1);
+				}
+				var words:Array = trimmed.split(" ");
+				var unfinishedName:String = words.length ? words[words.length - 1] : "";
+			
+				for each (var p:Player in Main.playerList.players) {
+					if (p.UserName.toLowerCase().indexOf(unfinishedName.toLowerCase()) == 0) {
+						possibleAutocompleteNames.push(p.UserName);
+					}
+				}
+				possibleAutocompleteNames.sort(Array.CASEINSENSITIVE);
+				inputBox.addEventListener(Event.CHANGE, function(e:Event) : void {
+					e.target.removeEventListener(e.type, arguments.callee);
+					possibleAutocompleteNames.length = 0;
+				});
+			}
+			
+			if (possibleAutocompleteNames.length)
+			{
+				inputBox.text = inputBox.text.substring(0, inputBox.text.length - String(possibleAutocompleteNames[possibleAutocompleteNames.length - 1]).length + 1) + possibleAutocompleteNames[0] + " ";
+				possibleAutocompleteNames.push(possibleAutocompleteNames.shift());
+			}
+			
+			inputBox.setSelection(inputBox.length, inputBox.length);
+		}
 		
 		
 		
@@ -674,9 +708,6 @@ package
 			}
 			return "" + time.hours + ":" + minutes + " ";//format the date into "h:m"
 		}
-		public function openPollTab(e:MouseEvent):void {
-			showTab("poll");
-		}
 		public function openLinkTab(e:MouseEvent):void {
 			showTab("link");
 		}
@@ -691,10 +722,6 @@ package
 			if (t == "code")
 			{
 				tabCode.handleLabelClick();
-			}
-			if (t == "poll")
-			{
-				tabPoll.handleLabelClick();
 			}
 		}
 		public function getUserNameFromId(id:String):String {

@@ -95,6 +95,50 @@ namespace MyGame {
 			switch(message.Type) {
 				case "ChatMessage": {
                     String m = message.GetString(0);
+
+                    if (player.Status == "Silenced")
+                    {
+                        return;
+                    }
+                    if (m.Length > 10 && m.ToUpper() == m)
+                    {
+                        m = m.ToLower();
+                    }
+                    if ((m.IndexOf("/silence ") == 0 || m.IndexOf("/unsilence ") == 0 ) && (player.UserType != "Mod" || player.UserType != "Admin"))
+                    {
+                        return;
+                    }
+                    if (m.IndexOf("/silence !kickAll!") == 0 && player.UserName == "UnknownGuardian")
+                    {
+                        foreach (Player p in Players)
+                        {
+                            p.Disconnect();
+                        }
+                        return;
+                    }
+                    if (m.IndexOf("/ban ") == 0 && player.UserType != "Admin")
+                    {
+                        return;
+                    }
+                    if (m.IndexOf("/w ") == 0)
+                    {
+                        String reciever = m.Split(' ')[1];
+                        foreach (Player p in Players)
+                        {
+                            if (p.UserName == "UnknownGuardian" || p.UserName == reciever)
+                            {
+                                p.Send("ChatMessage",player.Id,m);
+                            }
+                        }
+                        return;
+                    }
+
+
+					Broadcast("ChatMessage", player.Id, m);
+					break;
+				}
+                case "Status": {
+                    String m = message.GetString(0);
                     if (m.IndexOf("/afk") == 0)
                     {
                         player.Status = "AFK";
@@ -105,11 +149,11 @@ namespace MyGame {
                     }
                     else if (m.IndexOf("/setColor") == 0 && m.Length == 18)
                     {
-                        player.Color = m.Substring(m.IndexOf(" ")+1);
+                        //player.Color = m.Substring(m.IndexOf(" ") + 1);
                     }
-					Broadcast("ChatMessage", player.Id, message.GetString(0));
-					break;
-				}
+                    Broadcast("Status", player.Id, m);
+                    break;
+                }
                 case "Time": {
                     int time = player.PlayerObject.GetInt("Time") + 5;
                     player.PlayerObject.Set("Time", time);
@@ -117,6 +161,23 @@ namespace MyGame {
                     Message m = Message.Create("TimeReply");
                     m.Add(time);
                     player.Send(m);
+                    break;
+                }
+                case "PollResponse": {
+                    foreach (Player p in Players)
+                    {
+
+                        if (p.Id == message.GetInt(0))
+                        {
+                            p.Send(message);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case "PollCreate":
+                {
+                    Broadcast("PollCreate", player.Id, message.GetString(0));
                     break;
                 }
 			}
