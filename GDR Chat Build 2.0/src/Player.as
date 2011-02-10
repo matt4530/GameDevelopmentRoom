@@ -111,14 +111,14 @@ package
 				//Status = "AFK";
 				//silenceIcon.alpha = 0.3;
 				//silenceIcon.x = 205 - silenceIcon.width - 2;
-				Main.chatDisplay.sendMessage("/unsilenceUser " + UserName);
+				Main.chatDisplay.sendMessage("/unsilence " + UserName);
 			}
 			else
 			{
 				//Status = "Silenced";
 				//silenceIcon.alpha = 1;
 				//silenceIcon.x = 205;
-				Main.chatDisplay.sendMessage("/silenceUser " + UserName);
+				Main.chatDisplay.sendMessage("/silence " + UserName);
 			}
 		}
 		

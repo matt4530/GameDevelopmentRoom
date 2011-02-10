@@ -149,6 +149,9 @@ package
 					submitButton = new PushButton(creatorWindow.content, 5, 120, "Submit Response",submitPollOrResponse);
 				}
 			}
+			
+			creatorWindow.x = stage.stageWidth;
+			creatorWindow.y = 125;
 		}
 		
 		public function closeWindow(e:Event):void

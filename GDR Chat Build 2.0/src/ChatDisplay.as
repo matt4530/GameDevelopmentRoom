@@ -172,7 +172,6 @@ package
 			poll.addEventListener(MouseEvent.CLICK, openPollTab);
 			
 			tabPoll = new PollManager(true);
-			tabPoll.x = 0;
 			addChild(tabPoll);
 			
 			var link:LinksTabIcon = new LinksTabIcon();
@@ -332,15 +331,15 @@ package
 				return;
 			}
 			
-			if (m.indexOf("/silenceUser ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
+			if (m.indexOf("/silence ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
 			{
 				return;
 			}
-			if (m.indexOf("/unsilenceUser ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
+			if (m.indexOf("/unsilence ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
 			{
 				return;
 			}
-			if (m.indexOf("/adminBan ") == 0 && !isUserAdmin(Kong.userName)) //if a non mod tries to silence
+			if (m.indexOf("/ban ") == 0 && !isUserAdmin(Kong.userName)) //if a non mod tries to silence
 			{
 				return;
 			}
@@ -375,21 +374,13 @@ package
 			{
 				var words:Array;
 				
-				if (message.indexOf("/silenceUser ") == 0) //silencing a user. 3 cases. 1) Silence this. 2) Display silence. 3) Kick all.
+				if (message.indexOf("/silence ") == 0) //silencing a user. 3 cases. 1) Silence this. 2) Display silence.
 				{
-					if (message.indexOf("/silenceUser " + Kong.userName) == 0)
+					if (message.indexOf("/silence " + Kong.userName) == 0)
 					{
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
 						displayEvent("silenced", "You are");
 						//userIsSilenced = true;
-					}
-					else if ((message.indexOf("/silenceUser !kickAll!") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
-					{
-						//TODO Stop reconnection timer
-						PlayTimer.stopReconnection();
-						Main.connection.disconnect();
-						displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
-						//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 					}
 					else
 					{
@@ -400,9 +391,10 @@ package
 					return;
 				}
 				
-				if (message.indexOf("/unsilenceUser ") == 0) //silencing a user. 2 cases. 1) Silence this. 2) Display silence.
+				
+				if (message.indexOf("/unsilence ") == 0) //silencing a user. 2 cases. 1) Silence this. 2) Display silence.
 				{
-					if (message.indexOf("/unsilenceUser " + Kong.userName) == 0)
+					if (message.indexOf("/unsilence " + Kong.userName) == 0)
 					{
 						//userIsSilenced = false;
 						displayEvent("unsilenced", "You are");
@@ -417,9 +409,30 @@ package
 					return;
 				}
 				
-				if (message.indexOf("/adminBan") == 0) //banning a user. 1) Bans this. 2) Display Ban.
+				if ((message.indexOf("/kickAll") == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
 				{
-					if (message.indexOf("/adminBan " + Kong.userName) == 0)
+					//TODO Stop reconnection timer
+					PlayTimer.stopReconnection();
+					Main.connection.disconnect();
+					displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
+					//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
+					return;
+				}
+				
+				if ((message.indexOf("/kick " + Kong.userName) == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
+				{
+					//TODO Stop reconnection timer
+					PlayTimer.stopReconnection();
+					Main.connection.disconnect();
+					displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
+					//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
+					return;
+				}
+				
+				
+				if (message.indexOf("/ban") == 0) //banning a user. 1) Bans this. 2) Display Ban.
+				{
+					if (message.indexOf("/ban " + Kong.userName) == 0)
 					{
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
 						//userIsSilenced = true;
@@ -468,22 +481,22 @@ package
 					message = words.join(" ");
 				}
 				
-				
+				displayMessage("DEBUG: " + message);
 				if (message.indexOf("/w ") == 0) //private messages 4 cases. 1) Sending to you. 2)From you. 3)For UnknownGuardian 4)What everyone else should see
 				{
 					words = message.split(" ", 2);
 					var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 					if (words[1] == Kong.userName)
 					{
-						message = '<font color="#0098FFF">' + restOfMessage + '</font>';
+						message = '<font color="#0098FFF">[PM]' + restOfMessage + '</font>';
 					}
 					else if (getUserNameFromId(id) == Kong.userName)
 					{
-						message = '<font color="#0098FFF">(To ' + words[1] + ") " +  restOfMessage + '</font>';
+						message = '<font color="#0098FFF">[PM to ' + words[1] + "] " +  restOfMessage + '</font>';
 					}
 					else if (Kong.userName == "UnknownGuardian") //getUserNameFromId(id) == "UnknownGuardian"
 					{
-						message = '<font color="#0098FFF">' + message + '</font>';
+						message = '<font color="#0098FFF">[PM] ' + message + '</font>';
 					}
 					else
 					{

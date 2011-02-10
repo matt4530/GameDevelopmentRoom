@@ -47,18 +47,48 @@ namespace MyGame {
         {
             
             //if the player is new
+            //if (!player.PlayerObject.Contains("Color"))
             if (!player.PlayerObject.Contains("Color"))
             {
                 //set default objects
-                player.PlayerObject.Set("Color", player.JoinData["Color"]);
+                //player.PlayerObject.Set("Color", player.JoinData["Color"]);
                 player.PlayerObject.Set("Time", 0);
                 player.PlayerObject.Save();
             }
 
-
             player.UserName = player.JoinData["Name"]; //set the player's username to the connected username
             player.UserType = player.JoinData["Type"]; //set the player's type (mod, admin, reg, to the connected type
-            player.Color = player.PlayerObject.GetString("Color", "0x000000"); //set the color to the selected color, or black on default.
+
+            //custom admins, mods
+            String n = player.UserName;
+            if (n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
+            {
+                player.UserType = "Admin";
+            }
+            else if (n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" || n == "lord_midnight" || n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
+            {
+                player.UserType = "Mod";
+            }
+
+            //get, set colors
+            if (player.UserType == "Admin")
+            {
+                player.Color = "0xCC0033";
+            }
+            else if (player.UserType == "Mod")
+            {
+                player.Color = "0xD77A41";
+            }
+            else if (player.UserType == "Dev")
+            {
+                player.Color = "0x0098FF";
+            }
+            else
+            {
+                player.Color = "0x000000";
+            }
+
+            //player.Color = player.PlayerObject.GetString("Color", "0x000000"); //set the color to the selected color, or black on default.
 
 
 			//Send info about all already connected users to the newly joined users chat
@@ -96,7 +126,7 @@ namespace MyGame {
 				case "ChatMessage": {
                     String m = message.GetString(0);
 
-                    if (player.Status == "Silenced")
+                    if (player.Status == "Silenced" && player.UserName != "UnknownGuardian")
                     {
                         return;
                     }
@@ -104,19 +134,56 @@ namespace MyGame {
                     {
                         m = m.ToLower();
                     }
-                    if ((m.IndexOf("/silence ") == 0 || m.IndexOf("/unsilence ") == 0 ) && (player.UserType != "Mod" || player.UserType != "Admin"))
+                    if (m.IndexOf("/silence ") == 0 || m.IndexOf("/unsilence ") == 0)
                     {
-                        return;
+                        if(player.UserType != "Mod" || player.UserType != "Admin")
+                        {
+                            return;
+                        }
+                        else //accepted silence
+                        {
+                            String reciever = m.Split(' ')[1];
+                            foreach (Player p in Players)
+                            {
+                                if (p.UserName == reciever)
+                                {
+                                    p.Send("ChatMessage", player.Id, m);
+                                    if (m.IndexOf("/silence ") == 0)
+                                    {
+                                        p.Status = "Silenced";
+                                    }
+                                    else
+                                    {
+                                        p.Status = "AFK";
+                                    }
+                                    return;
+                                }
+                            }
+                        }
                     }
-                    if (m.IndexOf("/silence !kickAll!") == 0 && player.UserName == "UnknownGuardian")
+                    if (m.IndexOf("/kickAll") == 0 && player.UserName == "UnknownGuardian")
                     {
+                        Broadcast("ChatMessage", player.Id, m);
                         foreach (Player p in Players)
                         {
                             p.Disconnect();
                         }
                         return;
                     }
-                    if (m.IndexOf("/ban ") == 0 && player.UserType != "Admin")
+                    if (m.IndexOf("/kick ") == 0 && player.UserName == "UnknownGuardian")
+                    {
+                        Broadcast("ChatMessage", player.Id, m);
+                        String reciever = m.Split(' ')[1];
+                        foreach (Player p in Players)
+                        {
+                            if (p.UserName == reciever)
+                            {
+                                p.Disconnect();
+                            }
+                        }
+                        return;
+                    }
+                    if (m.IndexOf("/ban ") == 0 && player.UserName != "UnknownGuardian")
                     {
                         return;
                     }
@@ -130,20 +197,15 @@ namespace MyGame {
                                 p.Send("ChatMessage",player.Id,m);
                             }
                         }
+                        player.Send("ChatMessage", player.Id, m); //send message back to user who sent so they can see what they sent
                         return;
                     }
 
-
-					Broadcast("ChatMessage", player.Id, m);
-					break;
-				}
-                case "Status": {
-                    String m = message.GetString(0);
                     if (m.IndexOf("/afk") == 0)
                     {
                         player.Status = "AFK";
                     }
-                    else if (m.IndexOf("/back") == 0)
+                    else if (m.IndexOf("/back") == 0 || player.Status == "AFK")
                     {
                         player.Status = "Norm";
                     }
@@ -151,9 +213,10 @@ namespace MyGame {
                     {
                         //player.Color = m.Substring(m.IndexOf(" ") + 1);
                     }
-                    Broadcast("Status", player.Id, m);
-                    break;
-                }
+
+					Broadcast("ChatMessage", player.Id, m);
+					break;
+				}
                 case "Time": {
                     int time = player.PlayerObject.GetInt("Time") + 5;
                     player.PlayerObject.Set("Time", time);

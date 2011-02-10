@@ -327,9 +327,11 @@
 			var n:String = Kong.userName;
 			
 			trace("[Main][getHighestUserType()] ", Kong.isAdmin, Kong.isMod, Kong.isDev, Kong.isForumMod, Kong.isCurator, Kong.userName);
-			if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
+			//if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
+			if(Kong.isAdmin)
 				return "Admin";
-			if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
+			//if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
+			if(Kong.isMod)
 				return "Mod";
 			if(Kong.isDev)
 				return "Dev";
@@ -338,9 +340,11 @@
 		public static function getTypeColor():String {
 			var n:String = Kong.userName;
 			
+			//if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
 			if(Kong.isAdmin || n == "UnknownGuardian" || n == "BraydenBlack" || n == "davidarcila" || n == "Profusion")
 				return "0xCC0033";
-			if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
+			//if(Kong.isMod || n == "ST3ALTH15" || n == "BobTheCoolGuy" || n == "wolfheat" ||  n == "lord_midnight"|| n == "Rivaledsouls" || n == "Pimgd" || n == "Sanchex" || n == "Disassociative" || n == "eroge" || n == "GDRTestMod")
+			if(Kong.isMod)
 				return "0xD77A41";
 			if(Kong.isDev)
 				return "0x0098FF";
