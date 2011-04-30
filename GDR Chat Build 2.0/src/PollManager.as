@@ -135,12 +135,12 @@ package
 				{
 					creatorWindow.height = 185;
 					
-					choiceA = new RadioButton(creatorWindow.content, 5, questionInput.y + questionInput.height + 8, "Choice A");
-					choiceB = new RadioButton(creatorWindow.content, 5, choiceA.y + choiceA.height + 8, "Choice B");
-					choiceC = new RadioButton(creatorWindow.content, 5, choiceB.y + choiceB.height + 8, "Choice C");
+					choiceA = new RadioButton(creatorWindow.content, 5, questionInput.y + questionInput.height + 8, pollData.A);
+					choiceB = new RadioButton(creatorWindow.content, 5, choiceA.y + choiceA.height + 8, pollData.B);
+					choiceC = new RadioButton(creatorWindow.content, 5, choiceB.y + choiceB.height + 8, pollData.C);
 					submitButton = new PushButton(creatorWindow.content, 5, 140, "Submit Response",submitPollOrResponse);
 				}
-				else if (pollData.Type == "Y/N")
+				else if (pollData.Type == "Yes/No")
 				{
 					creatorWindow.height = 165;
 					
@@ -238,31 +238,60 @@ package
 			if (!isPollCreator)
 			{
 				//var serialize:String = Kong.userName + "|";
-				serialize = "UG" + "|";
+				serialize = pollData.Title + "|";
 				if (pollData.Type == "Text")
 				{
-					serialize = choiceText.text;
+					serialize += choiceText.text;
 				}
 				else if (pollData.Type == "ABC")
 				{
-					serialize = choiceA.selected ? "A" : choiceB.selected ? "B" : choiceC.selected ? "C" : "ERROR";
+					serialize += choiceA.selected ? "A" : choiceB.selected ? "B" : choiceC.selected ? "C" : "ERROR";
 				}
-				else if (pollData.Type == "Y/N")
+				else if (pollData.Type == "Yes/No")
 				{
-					serialize = choiceA.selected ? "Y" : choiceB.selected ? "N" : "ERROR";
+					serialize += choiceA.selected ? "Y" : choiceB.selected ? "N" : "ERROR";
 				}
-				Main.connection.send("PollResponse", [pollData.id, serialize]);
+				trace("[PollManger][submitPollOrResponse] Serialize = " + serialize);
+				Main.connection.send("PollResponse", pollData.Id, serialize);
+				kill();
 			}
 			else
 			{
-				serialize = hashInput + "|" + typeList.selectedItem + "|" + questionInput.text;
-				if (pollData.Type == "ABC")
+				serialize = hashInput.text + "|" + typeList.selectedItem + "|" + questionInput.text;
+				if (typeList.selectedItem == "ABC")
 				{
-					serialize += choiceA.label + "|" + choiceB.label + "|" + choiceC.label;
+					serialize += "|" + choiceA.label + "|" + choiceB.label + "|" + choiceC.label;
 				}
 				Main.connection.send("PollCreate", serialize);
+				
+				
+				choiceA.enabled = false;
+				choiceB.enabled = false;
+				choiceC.enabled = false;
+				choiceAInput.enabled = false;
+				choiceBInput.enabled = false;
+				choiceCInput.enabled = false;
+				choiceText.enabled = false;
+				choiceText.text = "Poll Results will appear here";
 			}
 			
+		}
+		
+		
+		public function handlePollResponse(u:String, s:String):void
+		{
+			if (hashInput.text == s.substr(0, s.indexOf("|")))
+			{
+				s = s.substr(s.indexOf("|") + 1);
+				if (typeList.selectedItem == "ABC" || typeList.selectedItem ==  "Yes/No")
+				{
+					choiceText.text += '\n' + s;// + " - " + u;
+				}
+				if (typeList.selectedItem == "Text")
+				{
+					choiceText.text += '\n' + s;// u + " - " + s;
+				}
+			}
 		}
 		
 		public function handleLabelClick():void
@@ -283,7 +312,34 @@ package
 			isExpanded = !isExpanded;
 			trace("[PollManager] isExpanded =", isExpanded, " x =", x);
 		}
-			
+		
+		
+		public function startPoll(serialized:String):void
+		{
+			pollData = { }; //clear old data
+			var arr:Array = serialized.split("|");
+			pollData.Id = int(arr[0]);
+			pollData.Title = arr[1];
+			pollData.Type = arr[2];
+			pollData.Question = arr[3];
+			if (pollData.Type == "ABC")
+			{
+				pollData.A = arr[4];
+				pollData.B = arr[5];
+				pollData.C = arr[6];
+			}
+		}
+		
+		public function kill():void
+		{
+			creatorWindow && creatorWindow.parent && creatorWindow.parent.removeChild(creatorWindow);
+			while (creatorWindow.content.numChildren > 0)
+			{
+				creatorWindow.content.removeChildAt(0);
+			}
+			creatorWindow.removeEventListener(Event.CLOSE, closeWindow);
+			typeList && typeList.removeEventListener(Event.SELECT, changePollType);
+		}
 	}
 
 }

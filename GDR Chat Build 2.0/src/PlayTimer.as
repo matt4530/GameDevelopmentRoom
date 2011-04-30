@@ -79,7 +79,7 @@ package
 			{
 				Main.chatDisplay.displayEvent("disconnect","");
 				Main.client.multiplayer.createJoinRoom(
-					"gdrroom",											//Room id. If set to null a random roomid is used
+					Main.roomName,											//Room id. If set to null a random roomid is used
 					"TicTacToe",										//The game type started on the server
 					false,												//Should the room be hidden from the lobby?
 					{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server

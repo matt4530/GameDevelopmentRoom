@@ -24,6 +24,7 @@
 	 */
 	public class Main extends Sprite 
 	{
+		public static var roomName:String = "Asd21ssr2(3hj1k232j3k#2hkj32hj23h2£$3kj2{hbdsao";
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
 		public static var playerList:PlayerList;
@@ -42,7 +43,7 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			///var p:PollManager = new PollManager(true);
+			//var p:PollManager = new PollManager(true);
 			//addChild(p);
 			
 			run();
@@ -190,6 +191,7 @@
 				PlayerIO.quickConnect.kongregateConnect(
 													    stage,
 													    "bettergdr-4dxwzr0qd0ycaegdgynhww",
+														//"gdr-mwvmnfxwn0mxd2fbzfd4a",
 													    Kong.userId,
 													    Kong.userToken,
 														connectedToPlayerIO,
@@ -217,7 +219,7 @@
 			
 			client = _client;
 			client.multiplayer.createJoinRoom(
-				"gdrroom",											//Room id. If set to null a random roomid is used
+				Main.roomName,											//Room id. If set to null a random roomid is used
 				"TicTacToe",										//The game type started on the server
 				false,												//Should the room be hidden from the lobby?
 				{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server
@@ -311,15 +313,26 @@
 			trace("[Main] onTimeReply");
 			PlayTimer.showRepliedTime(m, id, message);
 		}
-		public static function onPollResponse(m:Message = null, id:String = "", message:String = ""):void
+		public static function onPollResponse(m:Message = null, username:String = "", message:String = ""):void
 		{
 			trace("[Main] onPollResponse");
+			trace(m, "XXXX", username, "XXXX", message);
+			Main.chatDisplay.tabPoll.handlePollResponse(username, message);
 			
 		}
 		public static function onPollCreate(m:Message = null, id:String = "", message:String = ""):void
 		{
 			trace("[Main] onPollCreate");
-			
+			if (Main.chatDisplay.getUserNameFromId(id) != Kong.userName)
+			{
+				if (Main.chatDisplay.tabPoll)
+				{
+					Main.chatDisplay.tabPoll.kill();
+				}
+				Main.chatDisplay.tabPoll = new PollManager(false);
+				Main.chatDisplay.tabPoll.startPoll(id + "|" + message);
+				Main.chatDisplay.addChild(Main.chatDisplay.tabPoll);
+			}
 		}
 		
 		//util methods

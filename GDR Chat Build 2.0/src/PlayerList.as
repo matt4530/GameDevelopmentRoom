@@ -155,6 +155,7 @@ package
 			max < 0 ? max = 0 : null;
 			verticalScroll.pageSize = mask.height;
 			verticalScroll.maxScrollPosition = max;
+			verticalScroll.scrollPosition = 0; //added as of 2/25/11
 		}
 		
 		/*

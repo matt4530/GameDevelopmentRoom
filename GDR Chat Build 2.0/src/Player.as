@@ -30,7 +30,7 @@ package
 			UserName = n;// "CAKE-" + String.fromCharCode(int(Math.random() * 16) + 64);
 			Type = t;// Math.random() > 0.5 ? "Dev" : Math.random() > 0.5 ? "Mod" : Math.random() > 0.5 ? "Admin" : "Reg";
 			Status = s;
-			//Color = c;
+			Color = c;
 			
 			field = new TextField();
 			field.defaultTextFormat = new TextFormat("Arial", field.width > 230 ? 14 : 16, 0x000000, true);
@@ -52,7 +52,7 @@ package
 				icon.x = 220;
 				icon.y = 10;
 				addChild(icon);
-				Color = "0xD77A41";
+				//Color = "0xD77A41";
 			}
 			else if (Type == "Reg")
 			{
@@ -61,13 +61,13 @@ package
 				icon.y = 10;
 				addChild(icon);
 			}
-			else
+			else if(Type == "Admin")
 			{
 				icon = new UserTypeAdminIcon();
 				icon.x = 220;
 				icon.y = 10;
 				addChild(icon);
-				Color = "0xCC0033";
+				//Color = "0xCC0033";
 			}
 			if (Status == "AFK")
 			{
@@ -127,14 +127,20 @@ package
 			if (m == "unsilence")
 			{
 				Status = "AFK";
-				silenceIcon.alpha = 0.3;
-				silenceIcon.x = 205 - silenceIcon.width - 2;
+				if (silenceIcon) //not mod or admin, so don't have
+				{
+					silenceIcon.alpha = 0.3;
+					silenceIcon.x = 205 - silenceIcon.width - 2;
+				}
 			}
 			else
 			{
 				Status = "Silenced";
-				silenceIcon.alpha = 1;
-				silenceIcon.x = 205;
+				if (silenceIcon) //not mod or admin, so don't have
+				{
+					silenceIcon.alpha = 1;
+					silenceIcon.x = 205;
+				}
 			}
 		}
 		

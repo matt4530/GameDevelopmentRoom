@@ -29,12 +29,17 @@ package
 		public var inputBox:TextInput;
 		public var tabCode:TabCode;
 		public var tabPoll:PollManager;
+		public var tabLinks:LinksTab;
 		
-		public var soundMuted:Boolean = false;
+		public var soundMuted:int = 0; // 0  = all, 1 == name, 2 == none
 		//private var userIsSilenced:Boolean = false;
 		private var userLostFocus:Boolean = false;
 		private var timeOfLastMessage:int = 0;
 		private var minMessageInverval:int = 1250;
+		
+		private var numMessages:int = 0;
+		private var numMessagesHidden:int = 0;
+		private var hiddenMessages:String = "";
 		
 		public function ChatDisplay() 
 		{
@@ -113,7 +118,7 @@ package
 			
 			muteButton = new MuteSoundToggle();
 			muteButton.x = 630;
-			muteButton.y = 535;
+			muteButton.y = 533;
 			addChild(muteButton);
 		}
 		public function createBorders():void
@@ -171,14 +176,21 @@ package
 			addChild(poll);
 			poll.addEventListener(MouseEvent.CLICK, openPollTab);
 			
-			tabPoll = new PollManager(true);
-			addChild(tabPoll);
+			if (Kong.isAdmin || Kong.userName == "UnknownGuardian")
+			{
+				tabPoll = new PollManager(true);
+				addChild(tabPoll);
+			}
 			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
 			link.y = poll.y + poll.height + 12;
 			addChild(link);
 			link.addEventListener(MouseEvent.CLICK, openLinkTab);
+			
+			tabLinks = new LinksTab();
+			tabLinks.x = stage.stageWidth;
+			addChild(tabLinks);
 			
 			tabCode = new TabCode();
 			tabCode.x = stage.stageWidth;
@@ -296,16 +308,6 @@ package
 			
 			switch(m.toLowerCase()) //to handle any special message cases
 			{
-				case "/mutesound":
-					muteButton.show("muted");
-					soundMuted = true;
-					displayEvent("muteSound","");
-					return;
-				case "/unmutesound":
-					muteButton.show("unmuted");
-					soundMuted = false;
-					displayEvent("unmuteSound","");
-					return;
 				case "/clear":
 					chatBox.htmlText = "";
 					displayEvent("clear","");
@@ -322,6 +324,12 @@ package
 					//displayEvent("toAFK","");
 				case "/back":
 					//displayEvent("backAFK","");
+				/*case "/show":
+					chatBox.htmlText = hiddenMessages + chatBox.htmlText;
+					hiddenMessages = "";
+					numMessagesHidden = 0;
+					return;
+					*/
 			}
 			
 			if (m.indexOf("/unicorn") == 0) //unicorn
@@ -373,38 +381,40 @@ package
 			try 
 			{
 				var words:Array;
-				
+				trace("[onMessage] @1");
 				if (message.indexOf("/silence ") == 0) //silencing a user. 3 cases. 1) Silence this. 2) Display silence.
 				{
+					trace("[onMessage] @2");
 					if (message.indexOf("/silence " + Kong.userName) == 0)
 					{
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
-						displayEvent("silenced", "You are");
+						displayEvent("silenced", "You are", Main.playerList.getPlayerFromID(id).UserName);
 						//userIsSilenced = true;
 					}
 					else
 					{
+						trace("[onMessage] @3");
 						words = message.split(" ", 2); //split the message with spaces
 						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("silence");
-						displayEvent("silenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+						displayEvent("silenced", words[1], Main.playerList.getPlayerFromID(id).UserName); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
 				}
 				
-				
+				trace("[onMessage] @4");
 				if (message.indexOf("/unsilence ") == 0) //silencing a user. 2 cases. 1) Silence this. 2) Display silence.
 				{
 					if (message.indexOf("/unsilence " + Kong.userName) == 0)
 					{
 						//userIsSilenced = false;
-						displayEvent("unsilenced", "You are");
+						displayEvent("unsilenced", "You are", Main.playerList.getPlayerFromID(id).UserName);
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("unsilence");
 					}
 					else
 					{
 						words = message.split(" ", 2); //split the message with spaces
 						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("unsilence");
-						displayEvent("unsilenced", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+						displayEvent("unsilenced", words[1], Main.playerList.getPlayerFromID(id).UserName); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
 				}
@@ -419,7 +429,7 @@ package
 					return;
 				}
 				
-				if ((message.indexOf("/kick " + Kong.userName) == 0) && (getUserNameFromId(id) == "UnknownGuardian"))
+				if ((message.indexOf("/kick " + Kong.userName) == 0))
 				{
 					//TODO Stop reconnection timer
 					PlayTimer.stopReconnection();
@@ -427,6 +437,11 @@ package
 					displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
 					//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 					return;
+				}
+				else if ((message.indexOf("/kick ") == 0))// && (getUserNameFromId(id) == "UnknownGuardian"))
+				{
+					words = message.split(" ", 2); //split the message with spaces
+					displayEvent("kicked", words[1], getUserNameFromId(id)); //use second space delimit to grab username. Always will exist, since checked on sender side
 				}
 				
 				
@@ -436,12 +451,15 @@ package
 					{
 						Main.playerList.getPlayerFromName(Kong.userName).silenceMessageEvent("silence");
 						//userIsSilenced = true;
+						PlayTimer.stopReconnection();
+						Main.connection.disconnect();
+						displayMessage('<font color="#FF0000" size="13">[System]</font> Account Permabanned</font>');
 						banUser();
 					}
 					else
 					{
 						words = message.split(" ", 2); //split the message with spaces
-						displayEvent("banned", words[1]); //use second space delimit to grab username. Always will exist, since checked on sender side
+						displayEvent("banned", words[1], Main.playerList.getPlayerFromID(id).UserName); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
 				}
@@ -481,7 +499,6 @@ package
 					message = words.join(" ");
 				}
 				
-				displayMessage("DEBUG: " + message);
 				if (message.indexOf("/w ") == 0) //private messages 4 cases. 1) Sending to you. 2)From you. 3)For UnknownGuardian 4)What everyone else should see
 				{
 					words = message.split(" ", 2);
@@ -520,7 +537,7 @@ package
 					Main.playerList.getPlayerFromID(id).setToBack();
 				}
 				
-				if (message.indexOf(Kong.userName) != -1 && !soundMuted)
+				if ((soundMuted == 0 && userLostFocus) || (message.indexOf(Kong.userName) != -1 && soundMuted == 1))
 				{
 					var beep:Sound = new MessageSound();
 					beep.play();
@@ -531,10 +548,29 @@ package
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
 				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
 				
+				/*
+				numMessages++;
+				if (numMessages % 2 == 0)
+				{
+					displayMessage('Message Restore Point. Type /show to see all hidden messages.</font>' + '\n'); //display the message
+					
+					if (numMessagesHidden != 0)
+					{
+						var index:int = chatBox.htmlText.indexOf('Message Restore Point',10);
+						//displayMessage("Found at :" + index);
+						hiddenMessages += chatBox.htmlText.substring(0, index);
+						chatBox.htmlText = chatBox.htmlText.substring(index);
+					}
+					numMessagesHidden++;
+				}
+				*/
+				//StringUtil.neutralizeHTML(hiddenMessages);
+				//displayMessage("HIDDEN MESSAGE:" + hiddenMessages + "   numMessagedHidden:" + numMessagesHidden);
 			} 
 			catch (e:Error)
 			{
 				trace("[onMessage] Error: " + e);
+				displayMessage('<font size="13"><font color="#FF00FF"><b>[<a href=\"event:@nameERROR_CAUGHT">ERROR_CAUGHT</a>]</b></font> ' + e + '</font>'); //display the message
 			}
 		}
 		
@@ -566,7 +602,7 @@ package
 				chatBox.verticalScrollPosition = pos;
 			}
 		}
-		public function displayEvent(type:String, n:String):void
+		public function displayEvent(type:String, n:String, otherN:String = ""):void
 		{
 			switch(type)
 			{
@@ -577,13 +613,16 @@ package
 					displayMessage('<font color="#C0C0C0" size="12">[' + n + " left GDR]</font>");
 					break;
 				case "silenced":
-					displayMessage('<font color="#C0C0C0" size="12">[' + n + " silenced]</font>");
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " silenced by " + otherN +  "]</font>");
 					break;
 				case "unsilenced":
-					displayMessage('<font color="#C0C0C0" size="12">[' + n + " unsilenced]</font>");
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " unsilenced by " + otherN +  "]</font>");
 					break;
 				case "banned":
-					displayMessage('<font color="#C0C0C0" size="12">[' + n + " banned]</font>");
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " banned by " + otherN +  "]</font>");
+					break;
+				case "kicked":
+					displayMessage('<font color="#C0C0C0" size="12">[' + n + " kicked by " + otherN +  "]</font>");
 					break;
 				case "toAFK":
 					displayMessage('<font color="#C0C0C0" size="12">[Status: AFK]</font>');
@@ -616,7 +655,9 @@ package
 		public function textLink(e:TextEvent):void
 		{
 			if (e.text.indexOf("codeD") != -1)
-			{				
+			{			
+				tabCode.loadField.text = e.text;
+				tabCode.loadCode();
 				//var p:PasteBin = PasteBin(stage.getChildByName("PasteBin"));
 				//p.loadField.text = e.text;
 				//p.loadCode(null);
@@ -705,9 +746,13 @@ package
 			{
 				tabCode.handleLabelClick();
 			}
-			if (t == "poll")
+			if (t == "poll" && tabPoll)
 			{
 				tabPoll.handleLabelClick();
+			}
+			if (t == "link")
+			{
+				tabLinks.handleLabelClick();
 			}
 		}
 		public function getUserNameFromId(id:String):String {

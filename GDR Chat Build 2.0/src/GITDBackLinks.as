@@ -24,7 +24,7 @@ package
 		
 		public function click(e:MouseEvent):void
 		{
-			navigateToURL(new URLRequest("http://www.kongregate.com/games/Siveran/farm-of-souls"));
+			navigateToURL(new URLRequest("http://www.kongregate.com/games/YellowAfterlife/pipe10"));
 		}
 		public function rOut(e:MouseEvent):void
 		{
