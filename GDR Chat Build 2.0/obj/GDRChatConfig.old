@@ -14,7 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'3/23/2011'</value>
+      <value>'5/30/2011'</value>
     </define>
     <source-path append="true">
       <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src</path-element>
@@ -28,8 +28,6 @@
       <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\JSON Parser\as3corelib-.92.1\as3corelib-.92.1\src</path-element>
       <path-element>C:\Program Files (x86)\Adobe\Adobe Flash CS4\Common\Configuration\ActionScript 3.0\projects\Flash\src</path-element>
       <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\PixelBlitz\pixelblitz-read-only\src</path-element>
-      <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\Profusion Libraries</path-element>
-      <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\Stardust Particle Engine\src</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">

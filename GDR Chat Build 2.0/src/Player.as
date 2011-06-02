@@ -23,6 +23,8 @@ package
 		private var field:TextField;
 		private var icon:Sprite;
 		private var silenceIcon:Sprite;
+		private var collabIcon:Sprite;
+		public var collabNames:Array = ["Rivaledsouls","truefire","jonathanasdf","ST3ALTH15","skyboy","draganviper","qwerber","darkscanner","FlashSmith","mage_ruler9","Siveran","DPbrad","mikebolt","Senekis93","UnknownGuardian","ratkillcat","simplegoogly","lobstershow","GamerFefan","flexcool354","Cashughes"];
 		
 		public function Player(id:String, n:String, t:String, c:String, s:String) 
 		{
@@ -99,8 +101,24 @@ package
 				silenceIcon.addEventListener(MouseEvent.CLICK, toggleSilencePlayer);
 			}
 			
+			if (collabNames.indexOf(UserName) >= 0)
+			{
+				collabIcon = new UserTypeCollabIcon();
+				collabIcon.x = 170;
+				collabIcon.y = 10;
+				collabIcon.buttonMode = true;
+				addChild(collabIcon);
+				collabIcon.addEventListener(MouseEvent.CLICK, gotoCollab);
+			}
+			
+			
 			field.addEventListener(MouseEvent.CLICK, gotoProfile);
 			
+		}
+		
+		private function gotoCollab(e:MouseEvent):void 
+		{
+			navigateToURL(new URLRequest("http://kongcollab.xtreemhost.com/forums/index.php"));
 		}
 		
 		public function toggleSilencePlayer(e:MouseEvent = null):void
@@ -146,7 +164,7 @@ package
 		
 		public function gotoProfile(e:MouseEvent):void
 		{
-			if (e.currentTarget != silenceIcon)
+			if (e.currentTarget != silenceIcon && e.currentTarget != collabIcon)
 			{
 				navigateToURL(new URLRequest("http://www.kongregate.com/accounts/" + UserName));
 			}

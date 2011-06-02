@@ -347,11 +347,15 @@ package
 			{
 				return;
 			}
-			if (m.indexOf("/ban ") == 0 && !isUserAdmin(Kong.userName)) //if a non mod tries to silence
+			if (m.indexOf("/ban ") == 0 && !isUserAdmin(Kong.userName)) //if a non admin tries to silence
 			{
 				return;
 			}
 			if (m.indexOf("/setColor") == 0)// && m.length == 18 && PlayTimer.minutesTime < 2000) //changing a color.
+			{
+				return;
+			}
+			if (m.indexOf("/say ") == 0 && !isUserAdmin(Kong.userName)) //if a non admin tries to silence
 			{
 				return;
 			}
@@ -395,7 +399,9 @@ package
 					{
 						trace("[onMessage] @3");
 						words = message.split(" ", 2); //split the message with spaces
-						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("silence");
+						var p1:Player = Main.playerList.getPlayerFromName(words[1]);
+						if (p1 == null) return;
+						p1.silenceMessageEvent("silence");
 						displayEvent("silenced", words[1], Main.playerList.getPlayerFromID(id).UserName); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -413,7 +419,9 @@ package
 					else
 					{
 						words = message.split(" ", 2); //split the message with spaces
-						Main.playerList.getPlayerFromName(words[1]).silenceMessageEvent("unsilence");
+						var p:Player = Main.playerList.getPlayerFromName(words[1]);
+						if (p == null) return;
+						p.silenceMessageEvent("unsilence");
 						displayEvent("unsilenced", words[1], Main.playerList.getPlayerFromID(id).UserName); //use second space delimit to grab username. Always will exist, since checked on sender side
 					}
 					return;
@@ -442,6 +450,7 @@ package
 				{
 					words = message.split(" ", 2); //split the message with spaces
 					displayEvent("kicked", words[1], getUserNameFromId(id)); //use second space delimit to grab username. Always will exist, since checked on sender side
+					return;
 				}
 				
 				
@@ -471,6 +480,15 @@ package
 					//TODO setColor
 					//example: userbox.setColor(id, words[1]);
 					return;
+				}
+				
+				if (message.indexOf("/say ") == 0)
+				{
+					words = message.split(" "); //split the message with spaces
+					var fakeName:Player = Main.playerList.getPlayerFromName(words[1]);
+					if (fakeName == null) return;
+					id = fakeName.ID;
+					message = words.slice(2).join(" ");
 				}
 				
 				if(message.indexOf("codeD") != -1) //code link
@@ -607,9 +625,11 @@ package
 			switch(type)
 			{
 				case "join":
+					if (n == "RikkiG") return;
 					displayMessage('<font color="#C0C0C0" size="12">[' + n + " joined GDR]</font>");
 					break;
 				case "leave":
+					if (n == "RikkiG") return;
 					displayMessage('<font color="#C0C0C0" size="12">[' + n + " left GDR]</font>");
 					break;
 				case "silenced":
