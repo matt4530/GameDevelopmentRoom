@@ -1,4 +1,4 @@
-package  
+package  //original
 {
 	import fl.controls.TextArea;
 	import fl.controls.TextInput;
@@ -37,9 +37,12 @@ package
 		private var timeOfLastMessage:int = 0;
 		private var minMessageInverval:int = 1250;
 		
-		private var numMessages:int = 0;
-		private var numMessagesHidden:int = 0;
-		private var hiddenMessages:String = "";
+		
+		
+		
+		
+		private var poll:Poll;
+		private var pollColor:String = "#00CC33";
 		
 		public function ChatDisplay() 
 		{
@@ -246,6 +249,10 @@ package
 			{
 				displayMessage('<font color="#CC0033" size="13">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
 				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
+				if (Main.roomName == Main.regRoomName)
+				Main.chatDisplay.displayEvent("joinRoom", "Regular");
+			else if (Main.roomName == Main.collabRoomName)
+				Main.chatDisplay.displayEvent("joinRoom","Collabs");
 			}
 		}
 		public function playerCreateHelper(m:Message, id:String, a:int):void
@@ -338,7 +345,45 @@ package
 				Kong.stats.submit("UnicornsBelievedIn", 1);
 				return;
 			}
-			
+			if (m.indexOf("/vote") == 0)
+			{
+				if (!(isUserMod(Kong.userName) || isUserAdmin(Kong.userName)))
+				{
+					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Only mods and admins can start polls" + '</font>');
+					return;
+				}
+				if (poll)
+				{
+					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "You already have a poll in progress" + '</font>');
+					return;
+				}
+				var newPoll:Poll = Poll.parsePoll(m);
+				if (newPoll == null)
+				{
+					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Invalid Poll" + '</font>');
+					return;
+				}
+				else
+				{
+					poll = newPoll;
+					Main.connection.send("ChatMessage", "/vote"+poll.getMessage());
+				}
+				return;
+			}
+			if (m.indexOf("/endVote") == 0)
+			{
+				if (poll)
+				{
+					Main.connection.send("ChatMessage", "/vote"+poll.getResult());
+					poll = null;
+					return;
+				}
+				else
+				{
+					displayMessage('<font size="13"><font color="' + pollColor + '"><b>[' + "Vote" + ']</b></font> ' + "No poll is running" + '</font>');
+					return;
+				}
+			}
 			if (m.indexOf("/silence ") == 0 && !(isUserMod(Kong.userName) || isUserAdmin(Kong.userName))) //if a non mod tries to silence
 			{
 				return;
@@ -360,11 +405,28 @@ package
 				return;
 			}
 			
+			if (m.indexOf("/join gdr") == 0 && Main.roomName == Main.regRoomName)
+			{
+				return;
+			}
+			if (m.indexOf("/join collab") == 0 && Main.roomName == Main.collabRoomName)
+			{
+				return;
+			}
+			if (m.indexOf("/join collab") == 0 || m.indexOf("/join gdr") == 0)
+			{
+				if ((Main.playerList.getPlayerFromName(Kong.userName).isCollaborator || isUserMod(Kong.userName) || isUserAdmin(Kong.userName)) && !PlayTimer.isTransferingRooms)
+				{
+					PlayTimer.swapRoomsStayConnected();
+				}
+				return;
+			}
+			
 			if(m.length > 500)//trim message to 500 chars max
 			{
 				m = m.substring(0,500);
 			}
-			if (m == "" || m == " " || m == "  " || m == "v") //check for basic spam
+			if (m.search(/\S/) == -1 || m == "v") //check for basic spam
 			{
 				return;
 			}
@@ -473,6 +535,18 @@ package
 					return;
 				}
 				
+				if (message.indexOf("/vote") == 0)
+				{
+					message = message.substr(5);
+					var lines:Array = message.split('|/|'); //use this symbol as a new line
+					for (var i:int = 0; i < lines.length; i++)
+					{
+						if(lines[i].length > 0)
+							displayMessage('<font size="13"><font color="'+pollColor+'"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">Vote</a>]</b></font> ' + lines[i] + '</font>');
+					}
+					return;
+				}
+				
 				if (message.indexOf("/setColor") == 0 && message.length == 18) //changing a color.
 				{
 					words = message.split(" ", 2); //split the message with spaces
@@ -494,11 +568,11 @@ package
 				if(message.indexOf("codeD") != -1) //code link
 				{
 					words = message.split(" ");
-					for (var i:int = 0; i < words.length; i++)
+					for (var q:int = 0; q < words.length; q++)
 					{
-						if (words[i].indexOf("codeD") == 0) //grab any codeD's on the line. Could be more than 1.
+						if (words[q].indexOf("codeD") == 0) //grab any codeD's on the line. Could be more than 1.
 						{
-							words[i] = '<b><i><font color="#0078FF"><a href=\"event:' + words[i] + '">' + words[i] + '</a></font></i></b>';
+							words[q] = '<b><i><font color="#0078FF"><a href=\"event:' + words[q] + '">' + words[q] + '</a></font></i></b>';
 						}
 					}
 					message = words.join(" ");
@@ -559,6 +633,11 @@ package
 				{
 					var beep:Sound = new MessageSound();
 					beep.play();
+				}
+				//Check if message is a vote for this user's poll
+				if (poll)
+				{
+					poll.checkVote(message,id);
 				}
 				
 				
@@ -668,6 +747,12 @@ package
 				case "reconnect":
 					displayMessage('<font color="#FF0000" size="12">[Reconnection Successful]</font>');
 					break;
+				case "roomTransfer":
+					displayMessage('<font color="#FF0000" size="12">[Transfering Rooms]</font>');
+					break;
+				case "joinRoom":
+					displayMessage('<font color="#FF0000" size="12">[Joined Room: ' + n + ']</font>');
+					break;
 				default:
 					break;
 			}
@@ -691,6 +776,10 @@ package
 				inputBox.appendText("/w " + e.text.substring(e.text.indexOf("@reply")+6));
 			}
 			else if (e.text.indexOf("http://") != -1)
+			{
+				navigateToURL( new URLRequest(e.text));
+			}
+			else if (e.text.indexOf("https://") != -1)
 			{
 				navigateToURL( new URLRequest(e.text));
 			}

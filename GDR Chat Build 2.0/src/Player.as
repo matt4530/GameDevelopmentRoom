@@ -19,12 +19,13 @@ package
 		public var Status:String = "Norm";
 		public var Color:String = "0x000000";
 		public var Type:String = "Mod";
+		public var isCollaborator:Boolean = false;
 		
 		private var field:TextField;
 		private var icon:Sprite;
 		private var silenceIcon:Sprite;
 		private var collabIcon:Sprite;
-		public var collabNames:Array = ["Rivaledsouls","truefire","jonathanasdf","ST3ALTH15","skyboy","draganviper","qwerber","darkscanner","FlashSmith","mage_ruler9","Siveran","DPbrad","mikebolt","Senekis93","UnknownGuardian","ratkillcat","simplegoogly","lobstershow","GamerFefan","flexcool354","Cashughes"];
+		public var collabNames:Array = ["Rivaledsouls", "truefire", "jonathanasdf", "ST3ALTH15", "skyboy", "draganviper", "qwerber", "darkscanner", "FlashSmith", "mage_ruler9", "Siveran", "DPbrad", "mikebolt", "Senekis93", "UnknownGuardian", "ratkillcat", "simplegoogly", "lobstershow", "GamerFefan", "Flexcool354", "cashughes", "TheWhiteAngel", "BraydenBlack", "nojkimserious", "turoni", "DannyDaNinja"];
 		
 		public function Player(id:String, n:String, t:String, c:String, s:String) 
 		{
@@ -109,6 +110,8 @@ package
 				collabIcon.buttonMode = true;
 				addChild(collabIcon);
 				collabIcon.addEventListener(MouseEvent.CLICK, gotoCollab);
+				
+				isCollaborator = true;
 			}
 			
 			

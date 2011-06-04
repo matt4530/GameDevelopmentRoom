@@ -21,6 +21,8 @@ package
 		public static var serverUpdateTime:Timer;
 		public static var reconnectTime:Timer;
 		
+		public static var isTransferingRooms:Boolean = false;
+		
 		public function PlayTimer() 
 		{
 			serverUpdateTime = new Timer(300000, 0);
@@ -89,6 +91,31 @@ package
 				);
 			}
 		}
+		public static function swapRoomsStayConnected():void
+		{
+			PlayTimer.isTransferingRooms = true;
+			reconnectTime.stop();
+			Main.connection.disconnect();
+			if (Main.roomName == Main.regRoomName)
+			{
+				Main.roomName = Main.collabRoomName;
+			}
+			else
+			{
+				Main.roomName = Main.regRoomName;
+			}
+			
+			Main.chatDisplay.displayEvent("roomTransfer","");
+				Main.client.multiplayer.createJoinRoom(
+					Main.roomName,											//Room id. If set to null a random roomid is used
+					"TicTacToe",										//The game type started on the server
+					false,												//Should the room be hidden from the lobby?
+					{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server
+					{Name:Kong.userName,Type:Main.getHighestUserType(), Color:Main.getTypeColor()},	//User join data
+					handleReconnection,											//Function executed on successful joining of the room
+					handleReconnectionError										//Function executed if we got a join error
+				);
+		}
 		public static function handleReconnection(connection:Connection):void
 		{
 			Main.playerList.removeAllPlayers();
@@ -98,6 +125,16 @@ package
 			Main.connection.addMessageHandler("ChatLeft", Main.onLeave);
 			Main.connection.addMessageHandler("ChatMessage", Main.onMessage)
 			Main.chatDisplay.displayEvent("reconnect", "");
+			if (Main.roomName == Main.regRoomName)
+				Main.chatDisplay.displayEvent("joinRoom", "Regular");
+			else if (Main.roomName == Main.collabRoomName)
+				Main.chatDisplay.displayEvent("joinRoom", "Collabs");
+				
+			if (PlayTimer.isTransferingRooms)
+			{
+				reconnectTime.start();
+				PlayTimer.isTransferingRooms = false;
+			}
 		}
 		public static function handleReconnectionError(error:PlayerIOError):void
 		{
