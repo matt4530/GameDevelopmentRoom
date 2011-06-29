@@ -345,6 +345,17 @@ package  //original
 				Kong.stats.submit("UnicornsBelievedIn", 1);
 				return;
 			}
+			if (m.indexOf("/unicron") == 0) //unicron
+			{
+				displayMessage('<font size="13"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> imma firin mah unicron!</font>');
+				Kong.stats.submit("UnicronsBelievedIn", 1);
+				return;
+			}
+			if (m.indexOf("/debug") == 0) //debug
+			{
+				KongChat.init();
+				return;
+			}
 			if (m.indexOf("/vote") == 0)
 			{
 				if (!(isUserMod(Kong.userName) || isUserAdmin(Kong.userName)))
@@ -560,6 +571,7 @@ package  //original
 				{
 					words = message.split(" "); //split the message with spaces
 					var fakeName:Player = Main.playerList.getPlayerFromName(words[1]);
+					if (words[i] == "GDR") fakeName = new Player("GDR", "System", "Admin", "0xFF8800", "");
 					if (fakeName == null) return;
 					id = fakeName.ID;
 					message = words.slice(2).join(" ");

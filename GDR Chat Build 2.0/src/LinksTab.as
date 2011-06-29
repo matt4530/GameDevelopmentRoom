@@ -126,10 +126,12 @@
 													]
 						});
 			_items.push( { label:"User Sites",	sub:[	{ label:"BobTheCoolGuy", 			link:"http://bobthecoolguy.wordpress.com/",									data:"Musings and thoughts on programming and more."},
-														{ label:"RTL_Shadow",				link:"http://www.aftershockstudioshq.com", 							data:"Aftershock Studio's main site, stuffed with exclusive content and great tutorials! AS3 and AS2 game tutorials, games, and exclusive content."},
+														{ label:"RTL_Shadow",				link:"http://www.aftershockstudioshq.com", 									data:"Aftershock Studio's main site, stuffed with exclusive content and great tutorials! AS3 and AS2 game tutorials, games, and exclusive content."},
 														{ label:"Sanchex",					link:"http://www.highupstudio.com/", 										data:"we are currently developing flash and iPone games. In a few months, we will expand our portfolio and offer many great and addicting games."},
-														{ label:"skyboy",					link:"http://www.skyript.com/", 											data:"AS3, in-depth, hard-core scripting. Not for the weak minded." },
+														{ label:"skyboy",					link:"http://www.skyript.com/",												data:"AS3, in-depth, hard-core scripting. Not for the weak minded." },
 														{ label:"ST3ALTH15", 				link:"http://randomprogrammerking.wordpress.com/",							data:"A programming blog aimed toward people trying to learn OOP and AS3."},
+														{ label:"destroyer57345", 			link:"http://nuerostarstudios.webs.com/",									data:"A 3 man amateur flash team that makes games for fun."},
+														{ label:"truefire", 				link:"http://namelessstudios.wordpress.com/",								data:"a small independent flash game development team. Most of us are still and school, and do this as a hobby."},
 														{ label:"UnknownGuardian",			link:"http://profusiongames.com/", 											data:"News on upcoming games, team updates, and game tutorials."}
 													]
 						});
