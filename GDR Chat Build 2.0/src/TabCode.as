@@ -47,7 +47,7 @@ package {
 		public var clearButton:Button;
 		public var highlightSyntaxButton:Button;
 		
-		public var isExpanded:Boolean = false;;
+		public var isExpanded:Boolean = false;
 		
 		
 		

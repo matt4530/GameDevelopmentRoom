@@ -177,13 +177,13 @@ package  //original
 			poll.x = 633;
 			poll.y = 50;
 			addChild(poll);
-			poll.addEventListener(MouseEvent.CLICK, openPollTab);
+			//poll.addEventListener(MouseEvent.CLICK, openPollTab);
 			
-			if (Kong.isAdmin || Kong.userName == "UnknownGuardian")
-			{
-				tabPoll = new PollManager(true);
-				addChild(tabPoll);
-			}
+			//if (Kong.isAdmin || Kong.userName == "UnknownGuardian")
+			//{
+				//tabPoll = new PollManager(true);
+				//addChild(tabPoll);
+			//}
 			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
