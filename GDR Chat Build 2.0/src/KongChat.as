@@ -8,7 +8,7 @@ package
 	 */
 	public class KongChat
 	{
-		
+		private static var isCreated:Boolean = false;
 		public function KongChat() 
 		{
 			
@@ -18,7 +18,8 @@ package
 		{
 			Kong.chat.showTab("Debug", "Debug", { size:0.5 } );
 			Kong.chat.addEventListener("tab_visible", onTabShown);
-			Kong.chat.addEventListener("message",onPlayerMessage);
+			Kong.chat.addEventListener("message", onPlayerMessage);
+			isCreated = true;
 		}
 		
 		static private function onPlayerMessage(e:*):void 
@@ -39,6 +40,15 @@ package
 			Kong.chat.displayMessage("Entering Debug Session","GDR");
 		}
 		
+		
+		static public function log(t:String):void 
+		{
+			if (!isCreated && Kong.userName == "UnknownGuardian")
+			{
+				init();				
+			}
+			Kong.chat.displayMessage(t,"GDR");
+		}
 	}
 
 }

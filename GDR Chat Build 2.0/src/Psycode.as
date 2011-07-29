@@ -15,8 +15,8 @@ package {
 	import com.greensock.TweenLite
     //[SWF(width=550,height=500,backgroundColor=0xFFFFFF,frameRate=60)]
     public class Psycode extends Sprite {
-        private var tabView:TabView;
-        private var bottomBar:BottomUIBar;
+        public var tabView:TabView;
+        public var bottomBar:BottomUIBar;
         private var liveClient:PsycodeLiveClient;
         
 		//UG's stuff
@@ -26,14 +26,15 @@ package {
 		
 		
         public function Psycode() {
-            stage.scaleMode = StageScaleMode.NO_SCALE;
-            stage.align = StageAlign.TOP_LEFT;
             
 			bottomBar = new BottomUIBar();
 			addChild(bottomBar);
 			
+			
             tabView = new TabView();
             addChild(tabView);
+			
+			bottomBar.tabView = tabView;
             
             tabView.addItem(new TextEditor(), "Untitled");
             tabView.addEventListener(Event.OPEN, function (event:Event):void {
@@ -48,6 +49,11 @@ package {
             //Security.allowDomain("*");
             
             //stage.addEventListener(Event.RESIZE, updateLayout);
+			addEventListener(Event.ADDED_TO_STAGE, init);
+		}
+		public function init(e:Event):void
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, init);
             stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler, true);
             updateLayout();
             
@@ -87,6 +93,11 @@ package {
             //menu.customItems.push(unloadItem);
             return menu;
         }
+		
+		public function setLoadField(t:String):void
+		{
+			bottomBar.textField.text = t;
+		}
         
         public function compile():void {
 			return;
@@ -2533,11 +2544,11 @@ class TabView extends UIControl {
     private var items:Array;
     private var addButton:SimpleButton;
 	
-    private var _currentItem:TabViewItem;
-    private function get currentItem():TabViewItem {
+    public var _currentItem:TabViewItem;
+    public function get currentItem():TabViewItem {
         return _currentItem;
     }
-    private function set currentItem(value:TabViewItem):void {
+    public function set currentItem(value:TabViewItem):void {
         if (_currentItem != value) {
             if (_currentItem) {
                 removeChild(_currentItem.content);
@@ -2623,6 +2634,10 @@ class TabView extends UIControl {
     public function getItemAt(index:int):DisplayObject {
         return TabViewItem(items[index]).content;
     }
+	
+	 public function getTabViewItemAt(index:int):TabViewItem {
+        return TabViewItem(items[index]);
+    }
     
     private function itemClickHandler(event:MouseEvent):void {
         currentItem = TabViewItem(event.currentTarget);
@@ -2679,7 +2694,9 @@ class TabView extends UIControl {
 }
 
 
-
+import playerio.DatabaseObject;
+import flash.utils.getTimer;
+import ugLabs.net.Kong;
 //UG Added
 class BottomUIBar extends UIControl {
 	
@@ -2687,23 +2704,24 @@ class BottomUIBar extends UIControl {
 	private var postButton:SimpleButton;
 	private var clearButton:SimpleButton;
 	private var textFieldBG:Sprite;
-	private var textField:TextInput;
+	public var textField:TextInput;
+	public var tabView:TabView;
 	public function BottomUIBar()
 	{
 		loadButton = createAddButton("Load Code");
-		loadButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
+		loadButton.addEventListener(MouseEvent.CLICK, loadCode);
 		loadButton.x = 286;
 		loadButton.y = 505;
         addChild(loadButton);
 		
 		postButton = createAddButton("Post Code");
-		postButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
+		postButton.addEventListener(MouseEvent.CLICK, postClickHandler);
 		postButton.x = 387;
 		postButton.y = 505;
         addChild(postButton);
 		
 		clearButton = createAddButton("Clear Code");
-		clearButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
+		clearButton.addEventListener(MouseEvent.CLICK, clearClickHandler);
 		clearButton.x = 488;
 		clearButton.y = 505;
         addChild(clearButton);
@@ -2721,10 +2739,86 @@ class BottomUIBar extends UIControl {
 		
 	}
 	
-	private function addButtonClickHandler(e:MouseEvent):void 
+	private function clearClickHandler(e:MouseEvent):void 
 	{
-		
+		TextEditor(tabView.currentItem.content).text = "";
+		tabView.currentItem.title = "Untitled";
 	}
+	
+	private function postClickHandler(e:MouseEvent):void 
+	{
+		if(TextEditor(tabView.currentItem.content).text.length < 10)
+		{
+			return;
+		}
+		var key:String = "codeD" + Kong.userName.substr(0, 7) + getTimer();
+		Main.client.bigDB.createObject("CodeBox", key, { data:TextEditor(tabView.currentItem.content).text }, textPostingCallback, textPostingError);
+		KongChat.log("Posted code");
+	}
+	public function textPostingError(e:*):void
+	{
+		//error in trying to add to database
+		textField.text = e.toString();
+		KongChat.log("Error in posting code to database" );
+	}
+	public function textPostingCallback(o:DatabaseObject):void
+	{
+		//post the short url in the loadField
+		textField.text = o.key;
+		KongChat.log("Key is " + o.key);
+	}
+	
+	public function loadCode(e:MouseEvent = null):void 
+	{
+		if(e == null)
+		{
+			Psycode(parent).handleLabelClick();
+		}
+		var key:String = textField.text;
+		if(key.length < 6)
+		{
+			KongChat.log("Key is too short");
+			return;
+		}
+		
+		//loop to see if it already exists
+		for (var i:int = 0; i < tabView.count; i++)
+		{
+			if (tabView.getTabViewItemAt(i).title == key)
+			{
+				KongChat.log("TabView already exists");
+				tabView.currentItem = tabView.getTabViewItemAt(i);
+				return;
+			}
+		}
+		
+		
+		KongChat.log("Attempting to load code");
+		Main.client.bigDB.load("CodeBox",key,textLoadingCallback,textLoadingError);
+	}
+	public function textLoadingError(e:*):void
+	{
+		TextEditor(tabView.currentItem.content).text =  "Could not load data" + e;
+		KongChat.log("Error Loading code");
+	}
+	public function textLoadingCallback(o:DatabaseObject):void
+	{
+		if (o.data == null)
+		{
+			return;
+		}
+		tabView.addItem(new TextEditor(), textField.text);
+		if (tabView.count != 0)
+		{
+			tabView.currentItem = tabView.getTabViewItemAt(tabView.count - 1);
+			KongChat.log("Changed current item to corret item");
+		}
+		else
+			tabView.currentItem = tabView.getTabViewItemAt(0);
+		TextEditor(tabView.currentItem.content).text = o.data;
+		KongChat.log("Set the current item's text to " + o.data.substring(0, 15) );
+	}
+	
 	private function createAddButton(text:String):SimpleButton {
         var u:Sprite = new Sprite();
         var o:Sprite = new Sprite();

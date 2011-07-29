@@ -15,15 +15,13 @@ package
 	{
 		public var s:Sprite = new Sprite();
 		public var displayCount:int = 0;
-		public var displayMax:int = 4;
+		public var displayMax:int = 2;
 		public var m:Sprite = new Sprite();
 		
 		public function GITDBackLinks() 
 		{
 			part1.addEventListener(MouseEvent.CLICK, click);
 			part2.addEventListener(MouseEvent.CLICK, click);
-			part3.addEventListener(MouseEvent.CLICK, click);
-			part4.addEventListener(MouseEvent.CLICK, click);
 			addEventListener(MouseEvent.ROLL_OUT, rOut);
 			addEventListener(MouseEvent.ROLL_OVER, rOver);
 			buttonMode = true;
@@ -65,11 +63,13 @@ package
 			if(e.currentTarget == part1)
 				navigateToURL(new URLRequest("http://www.kongregate.com/games/YellowAfterlife/pipe10"));
 			if(e.currentTarget == part2)
+				navigateToURL(new URLRequest("http://www.kongregate.com/games/orandze/sunget"));
+			/*if(e.currentTarget == part2)
 				navigateToURL(new URLRequest("http://www.kongregate.com/games/Siveran/farm-of-souls"));
 			if(e.currentTarget == part3)
 				navigateToURL(new URLRequest("http://www.kongregate.com/games/truefire/commander-cookie-vs-the-vegetables"));
 			if(e.currentTarget == part4)
-				navigateToURL(new URLRequest("http://www.kongregate.com/games/truefire/inversion"));
+				navigateToURL(new URLRequest("http://www.kongregate.com/games/truefire/inversion"));*/
 			trace(e.target.name);
 		}
 		public function rOut(e:MouseEvent):void

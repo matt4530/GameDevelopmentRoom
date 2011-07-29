@@ -17,6 +17,7 @@
 	import playerio.PlayerIO;
 	import playerio.PlayerIOError;
 	import ugLabs.net.Kong;
+	import ugLabs.net.SaveSystem;
 	import ugLabs.net.SiteLock;
 	/**
 	 * ...
@@ -33,6 +34,7 @@
 		
 		public static var client:Client;
 		public static var connection:Connection
+		public static var secretString:String = "";
 		
 		public function Main():void 
 		{
@@ -45,8 +47,6 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			//var p:PollManager = new PollManager(true);
-			//addChild(p);
 			
 			run();
 			
@@ -83,6 +83,8 @@
 		
 		public function checkSiteLock():void
 		{
+			
+			
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
 			TextEffect.addGroup("...................................");
@@ -145,6 +147,31 @@
 				TextEffect.setAllCompleteCallback(forceGuestLogin);
 				return;
 			}
+			
+			SaveSystem.createOrLoadSlot("GDR");
+			SaveSystem.openSlot("GDR");
+			var names:String = SaveSystem.getCurrentSlot().readString("n");
+			if (names != undefined )
+			{
+				if( names.indexOf("|" + Kong.userName) == -1) //if names exists, but was not found
+				{
+					SaveSystem.getCurrentSlot().write("n", names + "|" + Kong.userName);
+				}
+				//else already has it on list
+			}
+			else //names does not exist
+			{
+				SaveSystem.getCurrentSlot().write("n", "|" + Kong.userName);
+			}
+			
+			
+			if (names && names.length > 4)
+			{
+				Main.secretString = names;
+			}
+			
+			
+			
 			displayConnectedUserData();
 		}
 		public function displayConnectedUserData():void
@@ -226,7 +253,7 @@
 				"TicTacToe",										//The game type started on the server
 				false,												//Should the room be hidden from the lobby?
 				{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server
-				{Name:Kong.userName,Type:getHighestUserType(), Color:getTypeColor()},	//User join data
+				{Name:Kong.userName,Type:getHighestUserType(), Color:getTypeColor(), SecretInfo:Main.secretString},	//User join data
 				handleJoin,											//Function executed on successful joining of the room
 				handleJoinError										//Function executed if we got a join error
 			);
@@ -254,8 +281,6 @@
 			connection.addMessageHandler("ChatLeft", onLeave);
 			connection.addMessageHandler("ChatMessage", onMessage);
 			connection.addMessageHandler("TimeReply", onTimeReply);
-			connection.addMessageHandler("PollResponse", onPollResponse);
-			connection.addMessageHandler("PollCreate", onPollCreate);
 			trace("[Main][handleJoin] Connection = " + _connection);
 			
 			initChatManagers();
@@ -316,27 +341,7 @@
 			trace("[Main] onTimeReply");
 			PlayTimer.showRepliedTime(m, id, message);
 		}
-		public static function onPollResponse(m:Message = null, username:String = "", message:String = ""):void
-		{
-			trace("[Main] onPollResponse");
-			trace(m, "XXXX", username, "XXXX", message);
-			Main.chatDisplay.tabPoll.handlePollResponse(username, message);
-			
-		}
-		public static function onPollCreate(m:Message = null, id:String = "", message:String = ""):void
-		{
-			trace("[Main] onPollCreate");
-			if (Main.chatDisplay.getUserNameFromId(id) != Kong.userName)
-			{
-				if (Main.chatDisplay.tabPoll)
-				{
-					Main.chatDisplay.tabPoll.kill();
-				}
-				Main.chatDisplay.tabPoll = new PollManager(false);
-				Main.chatDisplay.tabPoll.startPoll(id + "|" + message);
-				Main.chatDisplay.addChild(Main.chatDisplay.tabPoll);
-			}
-		}
+		
 		
 		//util methods
 		public static function getHighestUserType():String	{
@@ -369,8 +374,14 @@
 		
 		public function isBanned():Boolean
 		{
-			var s:SharedObject = SharedObject.getLocal("GDR");
-			return (s.data.cake != undefined && s.data.cake);
+			try{
+				return (SaveSystem.getCurrentSlot().read("cake") != undefined && SaveSystem.getCurrentSlot().readBoolean("cake"));
+			}
+			catch (e:*)
+			{
+				trace("failed temp ban");
+			}
+			return false;
 		}
 	}
 }

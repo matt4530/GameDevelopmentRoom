@@ -16,6 +16,7 @@ package  //original
 	import flash.utils.getTimer;
 	import playerio.Message;
 	import ugLabs.net.Kong;
+	import ugLabs.net.SaveSystem;
 	import ugLabs.util.StringUtil;
 	/**
 	 * ...
@@ -27,8 +28,7 @@ package  //original
 		private var tempScroll:Number;
 		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
-		public var tabCode:TabCode;
-		public var tabPoll:PollManager;
+		public var tabCode:Psycode;// TabCode;
 		public var tabLinks:LinksTab;
 		
 		public var soundMuted:int = 0; // 0  = all, 1 == name, 2 == none
@@ -177,13 +177,6 @@ package  //original
 			poll.x = 633;
 			poll.y = 50;
 			addChild(poll);
-			//poll.addEventListener(MouseEvent.CLICK, openPollTab);
-			
-			//if (Kong.isAdmin || Kong.userName == "UnknownGuardian")
-			//{
-				//tabPoll = new PollManager(true);
-				//addChild(tabPoll);
-			//}
 			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
@@ -195,7 +188,7 @@ package  //original
 			tabLinks.x = stage.stageWidth;
 			addChild(tabLinks);
 			
-			tabCode = new TabCode();
+			tabCode = new Psycode()//TabCode();
 			tabCode.x = stage.stageWidth;
 			addChild(tabCode);
 			
@@ -571,7 +564,6 @@ package  //original
 				{
 					words = message.split(" "); //split the message with spaces
 					var fakeName:Player = Main.playerList.getPlayerFromName(words[1]);
-					if (words[i] == "GDR") fakeName = new Player("GDR", "System", "Admin", "0xFF8800", "");
 					if (fakeName == null) return;
 					id = fakeName.ID;
 					message = words.slice(2).join(" ");
@@ -773,8 +765,8 @@ package  //original
 		{
 			if (e.text.indexOf("codeD") != -1)
 			{			
-				tabCode.loadField.text = e.text;
-				tabCode.loadCode();
+				tabCode.setLoadField(e.text);//tabCode.loadField.text = e.text;
+				tabCode.bottomBar.loadCode(null);
 				//var p:PasteBin = PasteBin(stage.getChildByName("PasteBin"));
 				//p.loadField.text = e.text;
 				//p.loadCode(null);
@@ -849,9 +841,6 @@ package  //original
 			}
 			return "" + time.hours + ":" + minutes + " ";//format the date into "h:m"
 		}
-		public function openPollTab(e:MouseEvent):void {
-			showTab("poll");
-		}
 		public function openLinkTab(e:MouseEvent):void {
 			showTab("link");
 		}
@@ -867,11 +856,7 @@ package  //original
 			{
 				tabCode.handleLabelClick();
 			}
-			if (t == "poll" && tabPoll)
-			{
-				tabPoll.handleLabelClick();
-			}
-			if (t == "link")
+			else if (t == "link")
 			{
 				tabLinks.handleLabelClick();
 			}
@@ -912,9 +897,14 @@ package  //original
 		public function banUser():void {
 			//TODO banUser();
 			//Disconenct player
-			var s:SharedObject = SharedObject.getLocal("GDR");
-			s.data.cake = true;
-			s.flush();
+			
+			SaveSystem.getCurrentSlot().write("cake", true);
+			SaveSystem.saveCurrentSlot();
+			
+			
+			//var s:SharedObject = SharedObject.getLocal("GDR");
+			//s.data.cake = true;
+			//s.flush();
 		}
 		
 	}
