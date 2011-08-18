@@ -17,15 +17,14 @@ package
 		public var ID:String = "";
 		public var UserName:String = "UnknownGuardian";
 		public var Status:String = "Norm";
-		public var Color:String = "0x000000";
+		private var Color:String = "0x000000";
 		public var Type:String = "Mod";
 		public var isCollaborator:Boolean = false;
 		
 		private var field:TextField;
 		private var icon:Sprite;
 		private var silenceIcon:Sprite;
-		private var collabIcon:Sprite;
-		public var collabNames:Array = ["Rivaledsouls", "truefire", "jonathanasdf", "ST3ALTH15", "skyboy", "draganviper", "qwerber", "darkscanner", "FlashSmith", "mage_ruler9", "Siveran", "DPbrad", "mikebolt", "Senekis93", "UnknownGuardian", "ratkillcat", "simplegoogly", "lobstershow", "GamerFefan", "Flexcool354", "cashughes", "TheWhiteAngel", "BraydenBlack", "nojkimserious", "turoni", "DannyDaNinja"];
+		
 		
 		public function Player(id:String, n:String, t:String, c:String, s:String) 
 		{
@@ -34,6 +33,7 @@ package
 			Type = t;// Math.random() > 0.5 ? "Dev" : Math.random() > 0.5 ? "Mod" : Math.random() > 0.5 ? "Admin" : "Reg";
 			Status = s;
 			Color = c;
+			
 			
 			field = new TextField();
 			field.defaultTextFormat = new TextFormat("Arial", field.width > 230 ? 14 : 16, 0x000000, true);
@@ -100,28 +100,17 @@ package
 				addChild(silenceIcon);
 				
 				silenceIcon.addEventListener(MouseEvent.CLICK, toggleSilencePlayer);
-			}
-			
-			if (collabNames.indexOf(UserName) >= 0)
-			{
-				collabIcon = new UserTypeCollabIcon();
-				collabIcon.x = 170;
-				collabIcon.y = 10;
-				collabIcon.buttonMode = true;
-				addChild(collabIcon);
-				collabIcon.addEventListener(MouseEvent.CLICK, gotoCollab);
 				
-				isCollaborator = true;
+				if (Status == "Silenced")
+				{
+					silenceIcon.alpha = 1;
+					silenceIcon.x = 205;
+				}
 			}
 			
 			
 			field.addEventListener(MouseEvent.CLICK, gotoProfile);
 			
-		}
-		
-		private function gotoCollab(e:MouseEvent):void 
-		{
-			navigateToURL(new URLRequest("http://kongcollab.xtreemhost.com/forums/index.php"));
 		}
 		
 		public function toggleSilencePlayer(e:MouseEvent = null):void
@@ -167,7 +156,7 @@ package
 		
 		public function gotoProfile(e:MouseEvent):void
 		{
-			if (e.currentTarget != silenceIcon && e.currentTarget != collabIcon)
+			if (e.currentTarget != silenceIcon)
 			{
 				navigateToURL(new URLRequest("http://www.kongregate.com/accounts/" + UserName));
 			}
@@ -198,6 +187,30 @@ package
 		public function setColor(c:String):void
 		{
 			Color = c;
+		}
+		
+		public function getColor():String
+		{
+			if (UserName == "BobTheCoolGuy")
+			{
+				var r:Number = Math.random() * 15;
+				if (r < 1) return "0xC0C0C0";
+				if (r < 2) return "0x808080";
+				if (r < 3) return "0x000000";
+				if (r < 4) return "0xFF0000";
+				if (r < 5) return "0x800000";
+				if (r < 6) return "0xFFFF00";
+				if (r < 7) return "0x808000";
+				if (r < 8) return "0x00FF00";
+				if (r < 9) return "0x008000";
+				if (r < 10) return "0x00FFFF";
+				if (r < 11) return "0x008080";
+				if (r < 12) return "0x0000FF";
+				if (r < 13) return "0x000080";
+				if (r < 14) return "0xFF00FF";
+				if (r < 15) return "0x800080";
+			}
+			return Color;
 		}
 		
 		public function remove():void

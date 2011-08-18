@@ -647,7 +647,7 @@ package  //original
 				
 				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
-				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
+				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).getColor().substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
 				
 				/*
 				numMessages++;
