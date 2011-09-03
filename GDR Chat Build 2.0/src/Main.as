@@ -48,7 +48,10 @@
 			// entry point
 			
 			
-			run();
+			//run();
+			
+			var screen:SplashScreen = new SplashScreen(this);
+			stage.addChild(screen);
 			
 		}
 		
@@ -75,10 +78,11 @@
 			debugField.height = stage.stageHeight;
 			debugField.selectable = false;
 			debugField.editable = false;
+			TextEffect.setField(debugField);
 			TextEffect.add("       ====[GDR]====");
 			TextEffect.add("\n");
-			TextEffect.setField(debugField);
-			TextEffect.start(0.5);
+			
+			//TextEffect.start(0.5);
 		}
 		
 		public function checkSiteLock():void

@@ -89,14 +89,6 @@ package playerio{
 		*/
 		public static const NotASearchColumn:PlayerIOError = new PlayerIOError("The key you specified is not set as searchable. You can change the searchable keys in the admin panel for the server type",20);
 		/**
-		* PlayerIOError type if the server could not complete the heartbeat
-		*/
-		public static const HeartbeatFailed:PlayerIOError = new PlayerIOError("The server could not complete the heartbeat",40);
-		/**
-		* PlayerIOError type if the game code is invalid
-		*/
-		public static const InvalidGameCode:PlayerIOError = new PlayerIOError("The game code is invalid",41);
-		/**
 		* PlayerIOError type if the QuickConnect method (simple, facebook, kongregate...) is not enabled for the game. You can enable the various methods in the admin panel for the game
 		*/
 		public static const QuickConnectMethodNotEnabled:PlayerIOError = new PlayerIOError("The QuickConnect method (simple, facebook, kongregate...) is not enabled for the game. You can enable the various methods in the admin panel for the game",21);
@@ -153,6 +145,14 @@ package playerio{
 		*/
 		public static const CircularReference:PlayerIOError = new PlayerIOError("Cannot create circular references inside database objects",34);
 		/**
+		* PlayerIOError type if the server could not complete the heartbeat
+		*/
+		public static const HeartbeatFailed:PlayerIOError = new PlayerIOError("The server could not complete the heartbeat",40);
+		/**
+		* PlayerIOError type if the game code is invalid
+		*/
+		public static const InvalidGameCode:PlayerIOError = new PlayerIOError("The game code is invalid",41);
+		/**
 		* PlayerIOError type if cannot access coins or items before vault has been loaded. Please refresh the vault first.
 		*/
 		public static const VaultNotLoaded:PlayerIOError = new PlayerIOError("Cannot access coins or items before vault has been loaded. Please refresh the vault first.",50);
@@ -184,6 +184,10 @@ package playerio{
 		* PlayerIOError type if the chosen provider is not configured correctly in the admin panel
 		*/
 		public static const InvalidPayVaultProviderSetup:PlayerIOError = new PlayerIOError("The chosen provider is not configured correctly in the admin panel",58);
+		/**
+		* PlayerIOError type if unable to locate the custom PartnerPay action with the given key
+		*/
+		public static const UnknownPartnerPayAction:PlayerIOError = new PlayerIOError("Unable to locate the custom PartnerPay action with the given key",70);
 		/**
 		* @private
 		*/

@@ -27,6 +27,8 @@ package
 		
 		public static function start(displaySpeed:Number = -1):void
 		{
+			return;
+			
 			if (displaySpeed == -1)
 			{
 				displaySpeed = speed;
@@ -49,6 +51,8 @@ package
 		
 		public function setSpeed(displaySpeed:Number):void
 		{
+			return;
+			
 			if (timer)
 			{
 				timer.delay = displaySpeed;
@@ -58,6 +62,9 @@ package
 		
 		public static function add(s:String):void
 		{
+			field.text += s;
+			return;
+			
 			toAdd += s;
 			if (timer && !timer.running)
 			{
@@ -67,11 +74,17 @@ package
 		
 		public static function addGroup(s:String):void
 		{
+			field.text += s;
+			return;
+			
 			add( "|" + s + "|");
 		}
 		
 		private static function append(e:TimerEvent):void
 		{
+			return;
+			
+			
 			if (toAdd.length != 0)
 			{
 				var char:String = toAdd.charAt(0);
@@ -100,6 +113,9 @@ package
 		
 		public static function stop(clearWaitingText:Boolean = false):void
 		{
+			return;
+			
+			
 			if (timer)
 			{
 				if (timer.running)
@@ -118,6 +134,9 @@ package
 		
 		public static function setAllCompleteCallback(f:Function):void
 		{
+			f();
+			return;
+			
 			callback = f;
 		}
 		

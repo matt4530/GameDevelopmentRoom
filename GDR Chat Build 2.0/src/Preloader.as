@@ -9,6 +9,7 @@
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
 	import flash.text.TextField;
+	import flash.text.TextFormat;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.setTimeout;
 	
@@ -18,38 +19,33 @@
 	 */
 	public class Preloader extends MovieClip 
 	{
-		public var logo:TextField
 		
+		public var t:TextField;
 		public function Preloader() 
 		{
 			addEventListener(Event.ENTER_FRAME, checkFrame);
 			loaderInfo.addEventListener(ProgressEvent.PROGRESS, progress);
 			// show loader
-			graphics.lineStyle(1, 0xFFFFFF);
-			graphics.drawRect(0, 270, 650, 10);
 			
-			logo = new TextField();
-			logo.autoSize = 'center'
-			logo.htmlText = '<font size="30" face="Zekton"><a href=\"event:Profusion"><font color="#FFFFFF">Pro</font><font color="#0098FF">fusion</font> <font color="#FFFFFF">Dev Team</font></a>';
-			logo.selectable = false;
-			logo.addEventListener(TextEvent.LINK, textLink);
-			logo.x = (stage.stageWidth - logo.width) / 2;
-			logo.y = (stage.stageHeight - logo.height) / 2 - 50;
-			logo.name = "Logo";
-			stage.addChild(logo);
+			t = new TextField();
+			t.textColor = 0x666666;
+			t.defaultTextFormat = new TextFormat("Arial", 8);
+			t.autoSize = 'center';
+			t.text = "0%";
+			addChild(t);
 			
 		}
 		
 		private function progress(e:ProgressEvent):void 
 		{
 			// update loader
-			graphics.clear();
-			graphics.lineStyle(1, 0xFFFFFF);
-			graphics.drawRect(0, stage.stageHeight/2 - 5, stage.stageWidth-1, 10);
-			graphics.lineStyle(1, 0xFFFFFF, 0.7);
-			graphics.beginFill(0xFFFFFF, 0.7);
-			graphics.drawRect(2, stage.stageHeight/2 -3, (stage.stageWidth-5) * e.bytesLoaded / e.bytesTotal,  6);
+			var percent:Number = (e.target.bytesLoaded / e.target.bytesTotal) * 100;
+			graphics.beginFill(0x666666);
+			graphics.drawRect(stage.stageWidth / 2 - 50, stage.stageHeight / 2 - 1, int(percent), 4);
 			graphics.endFill();
+			t.x = percent + stage.stageWidth / 2 - 50 - t.width/2
+			t.y = stage.stageHeight / 2 - 15
+			t.text = int(percent).toString();
 		}
 		
 		private function checkFrame(e:Event):void 
@@ -72,32 +68,20 @@
 				s.data.numTimesVisited = 0;
 			}
 			s.data.numTimesVisited++;
-			
-			if (s.data.numTimesVisited <= 2)
-			{
-				setTimeout(continueOn, 3000);
-			}
-			else
-			{
-				continueOn();
-			}
 			s.flush();
+			continueOn();
 		}
 		
 		public function continueOn():void
 		{
+			t.parent.removeChild(t);
 			graphics.clear();
-			stage.removeChild(logo);
+			
+			stop();
 			loaderInfo.removeEventListener(ProgressEvent.PROGRESS, progress);
 			var mainClass:Class = getDefinitionByName("Main") as Class;
 			addChild(new mainClass() as DisplayObject);
-		}
-		
-		public function textLink(e:TextEvent):void
-		{
-			navigateToURL(new URLRequest("http://kdugames.wordpress.com/"));
-		}
-		
+		}		
 	}
 	
 }
