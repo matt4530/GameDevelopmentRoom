@@ -33,3 +33,10 @@ C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\Serverside G
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\TicTacToe.dll
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\TicTacToe.pdb
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\bin\Debug\TicTacToe.dll
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\bin\Debug\TicTacToe.pdb
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\bin\Debug\Player.IO GameLibrary.dll
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\bin\Debug\Player.IO GameLibrary.xml
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\TicTacToe.dll
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\Serverside Game Code\obj\Debug\TicTacToe.pdb

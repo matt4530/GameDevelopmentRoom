@@ -26,8 +26,8 @@
 	public class Main extends Sprite 
 	{
 		public static var roomName:String = Main.regRoomName;
-		public static var collabRoomName:String = "Asd21zsr2(3hj1q232j3k#2hkj32hj23h2£$3kh2{hbdsao";
-		public static var regRoomName:String = "Asd21ssr2(3hj1k232j3k#2hkj32hj23h2£$3kj2{hbdsao";
+		public static var collabRoomName:String = "{collabz}";
+		public static var regRoomName:String = "{main}";
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
 		public static var playerList:PlayerList;
@@ -95,7 +95,7 @@
 			TextEffect.add("\n");
 			TextEffect.addGroup("...................................");
 			TextEffect.add("\n");
-			TextEffect.add("SiteLock activating........");
+			TextEffect.add("SiteLock Activating........");
 			TextEffect.add("\n");
 			SiteLock.allowLocalPlay();
 			SiteLock.allowSites(["kongregate.com"]);

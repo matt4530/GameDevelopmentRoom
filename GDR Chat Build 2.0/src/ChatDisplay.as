@@ -400,7 +400,7 @@ package  //original
 			{
 				return;
 			}
-			if (m.indexOf("/setColor") == 0)// && m.length == 18 && PlayTimer.minutesTime < 2000) //changing a color.
+			if (m.indexOf("/setColor") == 0 && !isUserAdmin(Kong.userName))// && m.length == 18 && PlayTimer.minutesTime < 2000) //changing a color.
 			{
 				return;
 			}
@@ -551,10 +551,20 @@ package  //original
 					return;
 				}
 				
-				if (message.indexOf("/setColor") == 0 && message.length == 18) //changing a color.
+				if (message.indexOf("/setColor") == 0  && (getUserNameFromId(id) == "UnknownGuardian")) //changing a color.
 				{
-					words = message.split(" ", 2); //split the message with spaces
-					Main.playerList.getPlayerFromID(id).setColor(words[1]);
+					words = message.split(" "); //split the message with spaces
+					if(words.length == 2)
+						Main.playerList.getPlayerFromID(id).setColor(words[1]);
+					else if (words.length == 3)
+						Main.playerList.getPlayerFromName(words[1]).setColor(words[2]);
+					else if (words.length > 3)
+					{
+						for (var y:int = 1; y < words.length - 1; y++)
+						{
+							Main.playerList.getPlayerFromName(words[y]).setColor(words[words.length-1]);
+						}
+					}
 					//TODO setColor
 					//example: userbox.setColor(id, words[1]);
 					return;

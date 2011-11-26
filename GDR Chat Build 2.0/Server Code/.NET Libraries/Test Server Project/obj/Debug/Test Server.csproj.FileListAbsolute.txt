@@ -50,3 +50,13 @@ C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\.NET Librari
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\TicTacToe.pdb
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Player.IO GameLibrary.xml
 C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\obj\Debug\Test Server.exe
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\obj\Debug\Test Server.pdb
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Test Server.exe
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Test Server.pdb
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Player.IO Development Server.exe
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Player.IO GameLibrary.dll
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\TicTacToe.dll
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\TicTacToe.pdb
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\bin\Debug\Player.IO GameLibrary.xml
+C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\Server Code\.NET Libraries\Test Server Project\obj\Debug\ResolveAssemblyReference.cache

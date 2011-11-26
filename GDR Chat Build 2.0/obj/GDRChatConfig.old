@@ -16,24 +16,25 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'9/2/2011'</value>
+      <value>'10/11/2011'</value>
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src</path-element>
-      <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\ugLabs Library</path-element>
-      <path-element>C:\Users\Matthew\Documents\All Flash Projects\Flash Projects\greensock-tweening-platform-as3\greensock-tweening-platform-as3</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\greensock-tweening-platform-as3\greensock-tweening-platform-as3</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\ugLabs Library</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\Adobe</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src\Components.swc</path-element>
-      <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src\ChatSymbols.swc</path-element>
-      <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src\gdrtest.swc</path-element>
-      <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src\MinimalComps_0_9_8.swc</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src\Components.swc</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src\ChatSymbols.swc</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src\gdrtest.swc</path-element>
+      <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src\MinimalComps_0_9_8.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\Matthew\GameDevelopmentRoom\GDR Chat Build 2.0\src\Preloader.as</path-element>
+    <path-element>C:\Users\Matthew\Documents\All Flash\All Flash Projects\gdr\GDR Chat Build 2.0\src\Preloader.as</path-element>
   </file-specs>
   <default-background-color>#666666</default-background-color>
   <default-frame-rate>30</default-frame-rate>
