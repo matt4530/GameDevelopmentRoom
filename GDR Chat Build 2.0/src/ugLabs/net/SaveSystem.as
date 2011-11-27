@@ -75,7 +75,7 @@
 		private static var currentSlotOpen:Slot;
 		
 		//the array of slots of shared data
-		private static var saveSlots:Array = [];
+		private static var saveSlots:Vector.<Slot> = new Vector.<Slot>();
 		
 		/**
 		 * SaveSystem() constructor. Do not use.
@@ -105,17 +105,6 @@
 		}
 		
 		/**
-		 * createOrLoadSlot(name:String):void
-		 * @since 	06/15/2011
-		 * @param	name					Name of the save slot to be loaded or created if not found.
-		 * @return  Void
-		 */
-		public static function createOrLoadSlot(name:String):void
-		{
-			saveSlots.push(new Slot(name));
-		}
-		
-		/**
 		 * createOrLoadSlots(slotNames:Array):void
 		 * @since 	06/15/2011
 		 * @param	slotNames				Names of the save slots to be loaded or created if not found.
@@ -134,19 +123,6 @@
 					throw new Error("[SaveSystem] createSlots() Error: Pass in an array of Strings representing the names of each slot.");
 				}
 			}
-		}
-		
-		/**
-		 * openSlot(num:int = 0):Boolean
-		 * @since 	06/15/2011
-		 * @param	num						The index of a slot to open.
-		 * @return  Boolean					If opening the slot is successful.
-		 */
-		public static function openSlotIndex(num:int = 0):Boolean
-		{
-			if (saveSlots.length <= num || num < 0) return false;
-			currentSlotOpen = saveSlots[num];
-			return true;
 		}
 		
 		/**
@@ -169,20 +145,6 @@
 		}
 		
 		/**
-		 * closeCurrentSlot(shouldSave:Boolean = true ):Boolean
-		 * @since 	06/15/2011
-		 * @param	shouldSave				If the current slot should save before closing
-		 * @return  Boolean					If closing the slot is successful.
-		 */
-		public static function closeCurrentSlot(shouldSave:Boolean = true ):Boolean
-		{
-			if (currentSlotOpen == null) return false;
-			if (shouldSave) currentSlotOpen.save();
-			currentSlotOpen = null;
-			return true;
-		}
-		
-		/**
 		 * saveCurrentSlot():Boolean
 		 * @since 	06/15/2011
 		 * @return  Boolean					If saving the current slot is successful.
@@ -194,18 +156,6 @@
 			return true;
 		}
 		
-		/**
-		 * clearSlot(num:int = 0):Boolean
-		 * @since 	06/15/2011
-		 * @param	num						Index of the slot to clear.
-		 * @return  Boolean					If clearing the slot is successful.
-		 */
-		public static function clearSlotIndex(num:int = 0):Boolean
-		{
-			if (saveSlots.length <= num || num < 0) return false;
-			saveSlots[num].clear();
-			return true;
-		}
 		
 		/**
 		 * clearSlot(name:String):Boolean

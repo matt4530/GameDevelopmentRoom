@@ -2759,6 +2759,7 @@ class BottomUIBar extends UIControl {
 	{
 		//error in trying to add to database
 		textField.text = e.toString();
+		
 		KongChat.log("Error in posting code to database" );
 	}
 	public function textPostingCallback(o:DatabaseObject):void
@@ -2766,6 +2767,8 @@ class BottomUIBar extends UIControl {
 		//post the short url in the loadField
 		textField.text = o.key;
 		KongChat.log("Key is " + o.key);
+		Main.chatDisplay.inputBox.appendText(" " + o.key + " ");
+		KongChat.log("No Error thrown");
 	}
 	
 	public function loadCode(e:MouseEvent = null):void 

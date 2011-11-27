@@ -85,14 +85,14 @@
 		 * @param	name					Name of the property to read.
 		 * @return  *						The property requested.
 		 */
-		public function readString(name:String):String { return object.data[name]; }
-		public function readInt(name:String):int { return object.data[name]; }
-		public function readUint(name:String):uint { return object.data[name]; }
-		public function readNumber(name:String):Number { return object.data[name]; }
-		public function readBoolean(name:String):Boolean { return object.data[name]; }
-		public function readObject(name:String):Object { return object.data[name]; }
-		public function readArray(name:String):Array { return object.data[name]; }
-		public function read(name:String):* { trace(object.data[name]);  return object.data[name]; }
+		public function readString(name:String):String { return object.data[name]; }  	//null
+		public function readInt(name:String):int { return object.data[name]; }			//0
+		public function readUint(name:String):uint { return object.data[name]; }		//0
+		public function readNumber(name:String):Number { return object.data[name]; }	//NaN
+		public function readBoolean(name:String):Boolean { return object.data[name]; }	//false
+		public function readObject(name:String):Object { return object.data[name]; }	//null
+		public function readArray(name:String):Array { return object.data[name]; }		//null
+		public function read(name:String):* { trace(object.data[name]);  return object.data[name]; } //undefined
 		
 		/**
 		 * write(name:String, obj:*):void

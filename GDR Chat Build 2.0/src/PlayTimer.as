@@ -86,7 +86,7 @@ package
 					"TicTacToe",										//The game type started on the server
 					false,												//Should the room be hidden from the lobby?
 					{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server
-					{Name:Kong.userName,Type:Main.getHighestUserType(), Color:Main.getTypeColor(), SecretInfo:Main.secretString},	//User join data
+					{Name:Kong.userName,Type:Main.getHighestUserType(), SecretInfo:Main.secretString},	//User join data
 					handleReconnection,											//Function executed on successful joining of the room
 					handleReconnectionError										//Function executed if we got a join error
 				);
@@ -112,7 +112,7 @@ package
 					"TicTacToe",										//The game type started on the server
 					false,												//Should the room be hidden from the lobby?
 					{},													//Room data. This data is returned to lobby list. Variabels can be modifed on the server
-					{Name:Kong.userName,Type:Main.getHighestUserType(), Color:Main.getTypeColor()},	//User join data
+					{Name:Kong.userName,Type:Main.getHighestUserType(), SecretInfo:Main.secretString },	//User join data
 					handleReconnection,											//Function executed on successful joining of the room
 					handleReconnectionError										//Function executed if we got a join error
 				);

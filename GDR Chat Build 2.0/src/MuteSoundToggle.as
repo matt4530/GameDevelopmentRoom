@@ -1,6 +1,7 @@
 package  
 {
 	import flash.events.MouseEvent;
+	import ugLabs.net.SaveSystem;
 	/**
 	 * ...
 	 * @author UnknownGuardian
@@ -9,7 +10,13 @@ package
 	{
 		public function MuteSoundToggle() 
 		{
-			gotoAndStop(1);
+			if(SaveSystem.getCurrentSlot().read("SoundSetting") == undefined)
+				gotoAndStop(1);
+			else
+				gotoAndStop((SaveSystem.getCurrentSlot().read("SoundSetting") as int));
+				
+			Main.chatDisplay.soundMuted = currentFrame - 1;
+				
 			buttonMode = true;
 			addEventListener(MouseEvent.CLICK, click);
 		}
@@ -18,7 +25,10 @@ package
 		{
 			Main.chatDisplay.soundMuted++;
 			Main.chatDisplay.soundMuted %= 3;
-			gotoAndStop(Main.chatDisplay.soundMuted+1);
+			gotoAndStop(Main.chatDisplay.soundMuted + 1);
+			
+			SaveSystem.getCurrentSlot().write("SoundSetting", currentFrame);
+			SaveSystem.saveCurrentSlot();
 		}
 		
 	}

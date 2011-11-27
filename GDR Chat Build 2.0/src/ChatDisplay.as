@@ -1,5 +1,6 @@
 package  //original
 {
+	import com.adobe.serialization.json.JSON;
 	import fl.controls.TextArea;
 	import fl.controls.TextInput;
 	import flash.display.Sprite;
@@ -12,9 +13,12 @@ package  //original
 	import flash.media.Sound;
 	import flash.net.navigateToURL;
 	import flash.net.SharedObject;
+	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.getTimer;
+	import playerio.DatabaseObject;
 	import playerio.Message;
+	import playerio.PlayerIOError;
 	import ugLabs.net.Kong;
 	import ugLabs.net.SaveSystem;
 	import ugLabs.util.StringUtil;
@@ -240,7 +244,10 @@ package  //original
 			
 			if (chatBox.htmlText.length < 100)
 			{
-				displayMessage('<font color="#CC0033" size="13">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
+				if (SaveSystem.getCurrentSlot().read("SeenIntro") == undefined)
+					displayMessage('<font color="#CC0033" size="13">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
+					SaveSystem.getCurrentSlot().write("SeenIntro", true);
+					SaveSystem.saveCurrentSlot();
 				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
 				if (Main.roomName == Main.regRoomName)
 				Main.chatDisplay.displayEvent("joinRoom", "Regular");
@@ -409,6 +416,22 @@ package  //original
 				return;
 			}
 			
+			if (m.indexOf("/id ") == 0)
+			{
+				Kong.getJSONFor(m.split(" ")[1],traceUserData);
+			}
+			if (m.indexOf("/id2 ") == 0)
+			{
+				Kong.getJSONForID(m.split(" ")[1],traceUserData);
+			}
+			
+			/*
+			if (m.indexOf("/del") == 0 && isUserAdmin(Kong.userName))
+			{
+				for (var r:int = 0; r < 150;r+=5)
+					Main.client.bigDB.deleteRange("PlayerObjects", "TimeSort",[r], 0, 150, deleteSuccess, deleteFailure);
+			}*/
+			
 			if (m.indexOf("/join gdr") == 0 && Main.roomName == Main.regRoomName)
 			{
 				return;
@@ -443,6 +466,28 @@ package  //original
 			
 			timeOfLastMessage = getTimer();
 			Main.connection.send("ChatMessage", m)
+		}
+		
+		private function deleteSuccess(o:DatabaseObject):void 
+		{
+			displayMessage('<font color="#FF0000" size="13">[Query]</font> Dumped User Indexes' + o);
+		}
+		private function deleteFailure(e:PlayerIOError):void 
+		{
+			displayMessage('<font color="#FF0000" size="13">[Query]</font> ' + e.message);
+		}
+		
+		private function traceUserData(e:Event):void 
+		{
+			var load:URLLoader = URLLoader(e.target);
+			var playerData:Object = JSON.decode(load.data);
+			
+			if(playerData.success)
+			{
+				displayMessage('<font color="#FF0000" size="13">[Query]</font> User Data Retrieved: Name: ' + playerData.username + "  Id: " + playerData.user_id);
+			}
+			
+			return;
 		}
 		
 		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
@@ -611,15 +656,11 @@ package  //original
 					var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 					if (words[1] == Kong.userName)
 					{
-						message = '<font color="#0098FFF">[PM]' + restOfMessage + '</font>';
+						message = '<font color="#0098FFF">[PM]' + restOfMessage + ' (<font color="#CC0033"><u><a href=\"event:@reply' + getUserNameFromId(id) + '">reply</a></u></font>)</font>';
 					}
 					else if (getUserNameFromId(id) == Kong.userName)
 					{
 						message = '<font color="#0098FFF">[PM to ' + words[1] + "] " +  restOfMessage + '</font>';
-					}
-					else if (Kong.userName == "UnknownGuardian") //getUserNameFromId(id) == "UnknownGuardian"
-					{
-						message = '<font color="#0098FFF">[PM] ' + message + '</font>';
 					}
 					else
 					{
@@ -777,17 +818,22 @@ package  //original
 			{			
 				tabCode.setLoadField(e.text);//tabCode.loadField.text = e.text;
 				tabCode.bottomBar.loadCode(null);
+				
 				//var p:PasteBin = PasteBin(stage.getChildByName("PasteBin"));
 				//p.loadField.text = e.text;
 				//p.loadCode(null);
 			}
 			else if ( e.text.indexOf("@name") != -1)
 			{
-				inputBox.appendText( e.text.substring(e.text.indexOf("@name")+5));
+				inputBox.appendText( e.text.substring(e.text.indexOf("@name") + 5) + " ");
+				inputBox.setFocus();
+				inputBox.setSelection(inputBox.text.length, inputBox.text.length);
 			}
 			else if (e.text.indexOf("@reply") != -1)
 			{
-				inputBox.appendText("/w " + e.text.substring(e.text.indexOf("@reply")+6));
+				inputBox.appendText("/w " + e.text.substring(e.text.indexOf("@reply") + 6) + " ");
+				inputBox.setFocus();
+				inputBox.setSelection(inputBox.text.length, inputBox.text.length);
 			}
 			else if (e.text.indexOf("http://") != -1)
 			{
@@ -908,7 +954,7 @@ package  //original
 			//TODO banUser();
 			//Disconenct player
 			
-			SaveSystem.getCurrentSlot().write("cake", true);
+			SaveSystem.getCurrentSlot().write("banned", true);
 			SaveSystem.saveCurrentSlot();
 			
 			

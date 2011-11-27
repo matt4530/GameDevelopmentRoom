@@ -19,18 +19,23 @@ package
 	 */
 	public class SplashScreen extends Sprite
 	{
-		private var _m:Main;
 		private var _t:TextField
 		private var mySprite:Sprite = new Sprite(); 
 		public var tempAlpha:Number = 0;
 		
-		public function SplashScreen(m:Main ) 
+		public function SplashScreen() 
 		{
-			_m = m;
 			addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		public function init(e:Event):void
 		{
+			mySprite.useHandCursor = true;
+			
+			
+			graphics.beginFill(0xFFFFFF);
+			graphics.drawRect(0, 0, 650, 550);
+			graphics.endFill();
+			
 			//alpha = 0;
 			addChild(mySprite);
 			var m:Matrix = new Matrix(); 
@@ -60,7 +65,9 @@ package
 		
 		public function frame(e:Event):void
 		{
-			alpha = tempAlpha / 100;
+			mySprite.alpha = tempAlpha / 100;
+			
+			
 			
 			var m:Matrix = new Matrix(); 
 			m.createGradientBox( stage.stageWidth*2, stage.stageWidth*2, 3.14, -stage.stageWidth/2, -stage.stageHeight / 2);  
@@ -69,6 +76,8 @@ package
 			 
 			mySprite.graphics.drawRect(0,0,stage.stageWidth,stage.stageHeight); 
 			mySprite.graphics.endFill();
+			
+			
 		}
 		public function textLink(e:MouseEvent):void
 		{
@@ -83,8 +92,7 @@ package
 			removeEventListener(Event.ENTER_FRAME, frame);
 			mySprite.parent.removeChild(mySprite);
 			_t.parent.removeChild(_t);
-			_m.run();
-			_m = null;
+			Main.splashScreenFinished = true;
 			parent.removeChild(this);
 		}
 	}

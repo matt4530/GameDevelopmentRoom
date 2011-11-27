@@ -271,5 +271,35 @@
 				getPlayerInfoCallback();
 			}
 		}
+		
+		
+		/**
+		 * getPlayerInfo
+		 * @description		gets information about the player
+		 * @param			user: Name of a user to get
+		 * @param			callback: On Player Info downloaded and extracted
+		 */
+		public static function getJSONFor(user:String, callback:Function = null):void
+		{
+			var request:URLRequest = new URLRequest("http://api.kongregate.com/api/user_info.json?username=" + user);
+			var loader:URLLoader = new URLLoader();
+			loader.addEventListener(IOErrorEvent.IO_ERROR, catchIOError); //catch if username does not exist
+			loader.addEventListener(Event.COMPLETE, callback);
+			loader.load(request); 
+		}
+		/**
+		 * getPlayerInfo
+		 * @description		gets information about the player
+		 * @param			user: Name of a user to get
+		 * @param			callback: On Player Info downloaded and extracted
+		 */
+		public static function getJSONForID(user:String, callback:Function = null):void
+		{
+			var request:URLRequest = new URLRequest("http://api.kongregate.com/api/user_info.json?user_id=" + user);
+			var loader:URLLoader = new URLLoader();
+			loader.addEventListener(IOErrorEvent.IO_ERROR, catchIOError); //catch if username does not exist
+			loader.addEventListener(Event.COMPLETE, callback);
+			loader.load(request); 
+		}
 	}
 }
