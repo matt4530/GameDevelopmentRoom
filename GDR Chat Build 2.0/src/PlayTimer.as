@@ -35,10 +35,17 @@ package
 			reconnectTime.addEventListener(TimerEvent.TIMER, reconnectCheck);
 			reconnectTime.start();
 			
+			
 			timeDisplay = new TimeDisplay();
 			addChild(timeDisplay);
-			timeDisplay.texbox.defaultTextFormat = new TextFormat(null, 26, 0x000000, true, null, null, null, null, 'center');
-			timeDisplay.texbox.text = getFormattedTime(0);
+			try{
+				timeDisplay.texbox.defaultTextFormat = new TextFormat(null, 26, 0x000000, true, null, null, null, null, 'center');
+				timeDisplay.texbox.text = getFormattedTime(0);
+			}
+			catch (e:Error)
+			{
+				
+			}
 		}
 		
 

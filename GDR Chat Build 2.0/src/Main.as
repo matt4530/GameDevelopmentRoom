@@ -26,8 +26,8 @@
 	public class Main extends Sprite 
 	{
 		public static var roomName:String = Main.regRoomName;
-		public static var collabRoomName:String = "{collabz}";
-		public static var regRoomName:String = "{main}";
+		public static var collabRoomName:String = "{collabz2}";
+		public static var regRoomName:String = "{main2}";
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
 		public static var playerList:PlayerList;
@@ -44,7 +44,7 @@
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
-		private function init(e:Event = null):void 
+		public function init(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
@@ -54,7 +54,8 @@
 			createDebugField();
 			checkSiteLock();
 			var screen:SplashScreen = new SplashScreen();
-			stage.addChild(screen);
+			if(!SiteLock.isLocal())
+				stage.addChild(screen);
 			
 		}
 		
@@ -98,6 +99,7 @@
 			var approved:Boolean = SiteLock.checkURL(false);
 			if (SiteLock.isLocal())
 			{
+				initChatManagers();
 				TextEffect.add("Denied Access...............");
 				TextEffect.add("\n");
 				TextEffect.add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
@@ -307,7 +309,7 @@
 		{			
 			chatDisplay = new ChatDisplay();
 			stage.addChild(chatDisplay);
-			stage.swapChildren(debugField, chatDisplay);
+			stage.removeChild(debugField);
 		}
 		
 		public function lowerFrameRate():void

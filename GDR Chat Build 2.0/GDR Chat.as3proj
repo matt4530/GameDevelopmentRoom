@@ -50,7 +50,6 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="src\Components.swc" />
     <element path="src\ChatSymbols.swc" />
     <element path="src\gdrtest.swc" />
     <element path="src\MinimalComps_0_9_8.swc" />

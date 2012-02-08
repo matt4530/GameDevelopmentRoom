@@ -8,6 +8,7 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import ugLabs.net.Kong;
+	import ugLabs.net.SaveSystem;
 	/**
 	 * ...
 	 * @author UnknownGuardian
@@ -24,7 +25,12 @@ package
 		private var field:TextField;
 		private var icon:Sprite;
 		private var silenceIcon:Sprite;
+		private var infoIcon:Sprite;
 		
+		public var isMuted:Boolean = false;
+		public var isBold:Boolean = false;
+		public var beepWhenMessageFrom:Boolean = false;
+		public var nicks:Array = [];
 		
 		public function Player(id:String, n:String, t:String, c:String, s:String) 
 		{
@@ -38,6 +44,7 @@ package
 			field = new TextField();
 			field.defaultTextFormat = new TextFormat("Arial", field.width > 230 ? 14 : 16, 0x000000, true);
 			field.text = UserName;
+			field.x = 18;
 			field.selectable = false;
 			field.autoSize = "left";
 			addChild(field);
@@ -45,14 +52,14 @@ package
 			if (Type == "Dev")
 			{
 				icon = new UserTypeDevIcon();
-				icon.x = 220;
+				icon.x = 10;
 				icon.y = 10;
 				addChild(icon);
 			}
 			else if (Type == "Mod")
 			{
 				icon = new UserTypeModIcon();
-				icon.x = 220;
+				icon.x = 10;
 				icon.y = 10;
 				addChild(icon);
 				//Color = "0xD77A41";
@@ -60,14 +67,14 @@ package
 			else if (Type == "Reg")
 			{
 				icon = new UserTypeRegIcon();
-				icon.x = 220;
+				icon.x = 10;
 				icon.y = 10;
 				addChild(icon);
 			}
 			else if(Type == "Admin")
 			{
 				icon = new UserTypeAdminIcon();
-				icon.x = 220;
+				icon.x = 10;
 				icon.y = 10;
 				addChild(icon);
 				//Color = "0xCC0033";
@@ -76,12 +83,54 @@ package
 			{
 				setToAFK();
 			}
+			if (Status == "Help")
+			{
+				setToHelp();
+			}
+			
+			infoIcon = new InfoIcon();
+			infoIcon.x = 228;
+			infoIcon.y = 11;
+			
+			infoIcon.addEventListener(MouseEvent.CLICK, showUserInfo);
+			infoIcon.buttonMode = true;
 			
 			addEventListener(Event.ADDED_TO_STAGE, init);
 			
 			addEventListener(MouseEvent.ROLL_OVER, rOver);
 			addEventListener(MouseEvent.ROLL_OUT, rOut);
+			
+			
+			getSavedData();
 		}
+		
+		public function getSavedData():void 
+		{
+			nicks = [];
+			nicks.push(UserName);
+			
+			if (SaveSystem.getCurrentSlot() == null)
+			{
+				SaveSystem.createOrLoadSlots(["GDR_SaveSystem"]);
+				SaveSystem.openSlot("GDR_SaveSystem");
+			}
+			
+			var data:String = SaveSystem.getCurrentSlot().readString("UserInfo_" + UserName);
+			if (data == null) return;
+			var sub:Array = data.split("|");
+			isMuted = sub[1] == "true";
+			beepWhenMessageFrom = sub[2] == "true";
+			isBold = sub[3] == "true";
+			
+			if (Kong.userName == UserName)
+			{
+				var arr:Array = sub[0].split(" ");
+				for (var q:int = 0; q < arr.length; q++)
+					nicks.push(arr[q]);
+				//KongChat.log("Nicknames for " + UserName + " are: " + nicks.join(","));
+			}
+		}
+		
 		public function init(e:Event):void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
@@ -108,7 +157,7 @@ package
 				}
 			}
 			
-			
+			addChild(infoIcon);
 			field.addEventListener(MouseEvent.CLICK, gotoProfile);
 			
 		}
@@ -154,9 +203,14 @@ package
 			}
 		}
 		
+		private function showUserInfo(e:MouseEvent):void 
+		{
+			Main.chatDisplay.userProfilePanel.changeProfile(UserName);
+		}
+		
 		public function gotoProfile(e:MouseEvent):void
 		{
-			if (e.currentTarget != silenceIcon)
+			if (e.currentTarget != silenceIcon && e.currentTarget != infoIcon)
 			{
 				navigateToURL(new URLRequest("http://www.kongregate.com/accounts/" + UserName));
 			}
@@ -165,7 +219,7 @@ package
 		public function rOver(e:MouseEvent):void
 		{
 			graphics.beginFill(0x999999, 0.2);
-			graphics.drawRect(0, 0, width + 4, height);
+			graphics.drawRect(0, 0, width + 7, height);
 			graphics.endFill();
 		}
 		public function rOut(e:MouseEvent):void
@@ -177,6 +231,11 @@ package
 		{
 			field.textColor = 0x909090;
 			Status = "AFK";
+		}
+		public function setToHelp():void
+		{
+			field.textColor = 0x308014;
+			Status = "Help";
 		}
 		public function setToBack():void
 		{
@@ -191,7 +250,7 @@ package
 		
 		public function getColor():String
 		{
-			if (UserName == "BobTheCoolGuy")
+			/*if (UserName == "BobTheCoolGuy")
 			{
 				var r:Number = Math.random() * 15;
 				if (r < 1) return "0xC0C0C0";
@@ -209,7 +268,7 @@ package
 				if (r < 13) return "0x000080";
 				if (r < 14) return "0xFF00FF";
 				if (r < 15) return "0x800080";
-			}
+			}*/
 			return Color;
 		}
 		
@@ -218,6 +277,7 @@ package
 			removeEventListener(MouseEvent.ROLL_OVER, rOver);
 			removeEventListener(MouseEvent.ROLL_OUT, rOut);
 			field.removeEventListener(MouseEvent.CLICK, gotoProfile);
+			infoIcon.removeEventListener(MouseEvent.CLICK, showUserInfo);
 			if (silenceIcon)
 			{
 				silenceIcon.removeEventListener(MouseEvent.CLICK, toggleSilencePlayer);

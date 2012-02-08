@@ -32,8 +32,10 @@ package  //original
 		private var tempScroll:Number;
 		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
+		private var sendButton:SendButton;
 		public var tabCode:Psycode;// TabCode;
 		public var tabLinks:LinksTab;
+		public var userProfilePanel:ProfilePanel;
 		
 		public var soundMuted:int = 0; // 0  = all, 1 == name, 2 == none
 		//private var userIsSilenced:Boolean = false;
@@ -48,6 +50,8 @@ package  //original
 		private var poll:Poll;
 		private var pollColor:String = "#00CC33";
 		
+		
+		
 		public function ChatDisplay() 
 		{
 			addEventListener(Event.ADDED_TO_STAGE, init);
@@ -56,6 +60,14 @@ package  //original
 		public function init(e:Event ):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
+			
+			if (SaveSystem.getCurrentSlot() == null)
+			{
+				SaveSystem.createOrLoadSlots(["GDR_SaveSystem"]);
+				SaveSystem.openSlot("GDR_SaveSystem");
+				Main.chatDisplay = this;
+			}
+			
 			
 			createUserList();
 			createLinksList();
@@ -86,10 +98,16 @@ package  //original
 			b.y = 42;
 			addChild(b);
 			*/
+			/*
 			var b:GITDBackLinks = new GITDBackLinks();
 			b.x = 256;
 			b.y = 42;
-			addChild(b);
+			addChild(b);*/
+			
+			userProfilePanel = new ProfilePanel();
+			userProfilePanel.x = 460;
+			userProfilePanel.y = 100;
+			addChild(userProfilePanel);
 			
 		}
 		public function createChatBox():void
@@ -125,13 +143,19 @@ package  //original
 			
 			muteButton = new MuteSoundToggle();
 			muteButton.x = 630;
-			muteButton.y = 533;
+			muteButton.y = 505;
 			addChild(muteButton);
+			
+			sendButton = new SendButton();
+			sendButton.x = 630;
+			sendButton.y = 535;
+			addChild(sendButton);
+			sendButton.addEventListener(MouseEvent.CLICK, mDownOnSend);
 		}
 		public function createBorders():void
 		{
 			var d:Divider = new Divider();
-			d.x = -36;
+			d.x = -2;
 			d.y = 161;
 			addChild(d);
 			
@@ -143,13 +167,13 @@ package  //original
 		public function createHeader():void
 		{
 			var profusionLogo:ProfusionLogo = new ProfusionLogo();
-			profusionLogo.x = 542;
+			profusionLogo.x = 573;
 			profusionLogo.y = 24;
 			addChild(profusionLogo);
 			profusionLogo.addEventListener(MouseEvent.CLICK, clickProfusionLogo);
 			
 			var gdrLogo:GDRLogo = new GDRLogo();
-			gdrLogo.x = 420;
+			gdrLogo.x = 446;
 			gdrLogo.y = 24;
 			addChild(gdrLogo);
 			
@@ -170,21 +194,17 @@ package  //original
 			addChild(timeDisplay);*/
 			
 			var playTimer:PlayTimer = new PlayTimer();
-			playTimer.x = 313.5;
+			playTimer.x = 342;
 			playTimer.y = 24;
 			addChild(playTimer);
 			
 		}
 		public function createTabs():void
 		{
-			var poll:PollTabIcon = new PollTabIcon();
-			poll.x = 633;
-			poll.y = 50;
-			addChild(poll);
 			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
-			link.y = poll.y + poll.height + 12;
+			link.y = 226;
 			addChild(link);
 			link.addEventListener(MouseEvent.CLICK, openLinkTab);
 			
@@ -198,15 +218,9 @@ package  //original
 			
 			var code:CodeBoxIcon = new CodeBoxIcon();
 			code.x = 633;
-			code.y = link.y + link.height + 4;
+			code.y = 385;
 			addChild(code);
 			code.addEventListener(MouseEvent.CLICK, openCodeTab);
-			
-			var beta:BetaTabIcon = new BetaTabIcon();
-			beta.x = 633;
-			beta.y = code.y + code.height + 4;
-			addChild(beta);
-			beta.addEventListener(MouseEvent.CLICK, openBetaTab);
 		}
 		public function addFocusEvents():void
 		{
@@ -272,6 +286,13 @@ package  //original
 			var p:Player = new Player(_id, _name, _type, _color, _status);
 			trace("[playerCreateHelper] a =",a,"name = ",_name);
 			Main.playerList.addPlayer(p);
+			
+			if (_name == Kong.userName)
+			{
+				//this is you
+				if (_type == "Mod" || _type == "Admin") minMessageInverval = 402;
+				if (_type == "Dev") minMessageInverval = 1202;
+			}
 		}
 		public function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{
@@ -311,7 +332,7 @@ package  //original
 			
 			inputBox.text = ""; //clear since message is approved, and will continue
 			
-			m = StringUtil.neutralizeHTML(m); //remove any html in the string
+			//m = StringUtil.neutralizeHTML(m); //remove any html in the string
 			
 			switch(m.toLowerCase()) //to handle any special message cases
 			{
@@ -320,7 +341,6 @@ package  //original
 					displayEvent("clear","");
 					return;
 				case "/explain":
-				case "/help":
 				case "/myrevenue":
 				case "/mykredrevenue":
 				case "/myinfo":
@@ -403,7 +423,7 @@ package  //original
 			{
 				return;
 			}
-			if (m.indexOf("/ban ") == 0 && !isUserAdmin(Kong.userName)) //if a non admin tries to silence
+			if (m.indexOf("/ban ") == 0 && !(isUserAdmin(Kong.userName) || isUserMod(Kong.userName))) //if a non admin tries to silence
 			{
 				return;
 			}
@@ -654,7 +674,7 @@ package  //original
 				{
 					words = message.split(" ", 2);
 					var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
-					if (words[1] == Kong.userName)
+					if (words[1].toLowerCase() == Kong.userName.toLowerCase())
 					{
 						message = '<font color="#0098FFF">[PM]' + restOfMessage + ' (<font color="#CC0033"><u><a href=\"event:@reply' + getUserNameFromId(id) + '">reply</a></u></font>)</font>';
 					}
@@ -668,10 +688,27 @@ package  //original
 					}
 				}
 				
+				
+				if(message.indexOf("/system") == 0) //code link
+				{
+					words = message.split(" ", 2);
+					var restOfMessage2:String = message.substr(message.indexOf(words[0]) + words[0].length);
+					displayMessage('<font size="13"><b><font color="#FF0000">[<a href=\"event:@nameSystem">System</a>]</font> ' + restOfMessage2 + '</b></font>');
+					return;
+				}
+				
 				if (message.indexOf("/afk") == 0)
 				{
 					Main.playerList.getPlayerFromID(id).setToAFK();
 					return;
+				}
+				if (message.indexOf("/help") == 0)
+				{
+					Main.playerList.getPlayerFromID(id).setToHelp();
+				}
+				if (message.indexOf("/norm") == 0)
+				{
+					Main.playerList.getPlayerFromID(id).setToBack();
 				}
 				if (message.indexOf("/back") == 0)
 				{
@@ -684,17 +721,36 @@ package  //original
 					Main.playerList.getPlayerFromID(id).setToBack();
 				}
 				
-				if ((soundMuted == 0 && userLostFocus) || (message.indexOf(Kong.userName) != -1 && soundMuted == 1))
+				if (Main.playerList.getPlayerFromID(id).isMuted) return;
+				
+				
+				
+				var messageContainsNick:Boolean = false;
+				var tehPlayer:Player = Main.playerList.getPlayerFromName(Kong.userName);
+				for (var r:int = 0; r < tehPlayer.nicks.length; r++)
+				{
+					//KongChat.log("Testing nick " + tehPlayer.nicks[r]);
+					if (message.indexOf(tehPlayer.nicks[r]) != -1)
+					{
+						messageContainsNick = true;
+						//break;
+					}
+				}
+				//KongChat.log("Message contained Nick: " + messageContainsNick + " when nicks are " + tehPlayer.nicks.join(","));
+				if ((soundMuted == 0 && userLostFocus) || (messageContainsNick && soundMuted == 1) || Main.playerList.getPlayerFromID(id).beepWhenMessageFrom)
 				{
 					var beep:Sound = new MessageSound();
 					beep.play();
 				}
+				
 				//Check if message is a vote for this user's poll
 				if (poll)
 				{
 					poll.checkVote(message,id);
 				}
 				
+				if (Main.playerList.getPlayerFromID(id).isBold)
+					message = "<b>" + message + "</b>";
 				
 				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
@@ -855,6 +911,10 @@ package  //original
 				sendMessage(inputBox.text);
 			}
 		}
+		public function mDownOnSend(e:MouseEvent):void
+		{
+			sendMessage(inputBox.text);
+		}
 		
 		
 		
@@ -902,9 +962,6 @@ package  //original
 		}
 		public function openCodeTab(e:MouseEvent):void {
 			showTab("code");
-		}
-		public function openBetaTab(e:MouseEvent):void {
-			showTab("beta");
 		}
 		public function showTab(t:String):void
 		{

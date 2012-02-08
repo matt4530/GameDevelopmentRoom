@@ -25,14 +25,14 @@ package
 			
 			var sprite:Sprite = new Sprite();
 			sprite.graphics.beginFill(0xFFFFFF, 0);
-			sprite.graphics.drawRect(0, 0, 243, 148);
+			sprite.graphics.drawRect(0, 0, 265, 148);
 			sprite.graphics.endFill();
 			addChild(sprite);
 			mask = sprite;
 			
 			
 			verticalScroll = new UIScrollBar();
-			verticalScroll.x = 240 - 10;
+			verticalScroll.x = 250;
 			verticalScroll.y = 0;
 			verticalScroll.height = 148;
 			verticalScroll.enabled = true;
