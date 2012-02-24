@@ -15,6 +15,7 @@ package  //original
 	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.text.TextFormat;
 	import flash.utils.getTimer;
 	import playerio.DatabaseObject;
 	import playerio.Message;
@@ -32,7 +33,6 @@ package  //original
 		private var tempScroll:Number;
 		public var muteButton:MuteSoundToggle;
 		public var inputBox:TextInput;
-		private var sendButton:SendButton;
 		public var tabCode:Psycode;// TabCode;
 		public var tabLinks:LinksTab;
 		public var userProfilePanel:ProfilePanel;
@@ -91,19 +91,7 @@ package  //original
 			addChild(Main.playerList);
 		}
 		public function createLinksList():void
-		{
-			/*
-			var b:BackLinks = new BackLinks();
-			b.x = 256;
-			b.y = 42;
-			addChild(b);
-			*/
-			/*
-			var b:GITDBackLinks = new GITDBackLinks();
-			b.x = 256;
-			b.y = 42;
-			addChild(b);*/
-			
+		{			
 			userProfilePanel = new ProfilePanel();
 			userProfilePanel.x = 460;
 			userProfilePanel.y = 100;
@@ -131,6 +119,7 @@ package  //original
 			chatBox.horizontalScrollPolicy = "off";
 			chatBox.verticalScrollPolicy = "on";
 			chatBox.wordWrap = true;
+			chatBox.setStyle("textFormat", new TextFormat("Arial", 13));
 			chatBox.x = b.x;
 			chatBox.y = b.y;
 			chatBox.width = b.width;
@@ -143,14 +132,8 @@ package  //original
 			
 			muteButton = new MuteSoundToggle();
 			muteButton.x = 630;
-			muteButton.y = 505;
+			muteButton.y = 525;
 			addChild(muteButton);
-			
-			sendButton = new SendButton();
-			sendButton.x = 630;
-			sendButton.y = 535;
-			addChild(sendButton);
-			sendButton.addEventListener(MouseEvent.CLICK, mDownOnSend);
 		}
 		public function createBorders():void
 		{
@@ -158,11 +141,6 @@ package  //original
 			d.x = -2;
 			d.y = 161;
 			addChild(d);
-			
-			/*var di:Divider = new Divider();
-			di.x = 0;
-			di.y = 55;
-			addChild(di);*/
 		}
 		public function createHeader():void
 		{
@@ -177,22 +155,6 @@ package  //original
 			gdrLogo.y = 24;
 			addChild(gdrLogo);
 			
-			/*var profusionIcon:ProfusionIcon = new ProfusionIcon();
-			profusionIcon.x = 325;
-			profusionIcon.y = 24;
-			addChild(profusionIcon);
-			profusionIcon.addEventListener(MouseEvent.CLICK, clickProfusionIcon);*/
-			
-			/*var infoBackgrond:InformationBackground = new InformationBackground();
-			infoBackgrond.x = 190;
-			infoBackgrond.y = 27;
-			addChild(infoBackgrond);*/
-			
-			/*var timeDisplay:TimeDisplay = new TimeDisplay();
-			timeDisplay.x = 313.5;
-			timeDisplay.y = 24;
-			addChild(timeDisplay);*/
-			
 			var playTimer:PlayTimer = new PlayTimer();
 			playTimer.x = 342;
 			playTimer.y = 24;
@@ -201,13 +163,6 @@ package  //original
 		}
 		public function createTabs():void
 		{
-			
-			var link:LinksTabIcon = new LinksTabIcon();
-			link.x = 633;
-			link.y = 226;
-			addChild(link);
-			link.addEventListener(MouseEvent.CLICK, openLinkTab);
-			
 			tabLinks = new LinksTab();
 			tabLinks.x = stage.stageWidth;
 			addChild(tabLinks);
@@ -216,11 +171,24 @@ package  //original
 			tabCode.x = stage.stageWidth;
 			addChild(tabCode);
 			
+			var link:LinksTabIcon = new LinksTabIcon();
+			link.x = 633;
+			link.y = 226;
+			addChild(link);
+			link.addEventListener(MouseEvent.CLICK, openLinkTab);
+			
 			var code:CodeBoxIcon = new CodeBoxIcon();
 			code.x = 633;
-			code.y = 385;
+			code.y = 335;
 			addChild(code);
 			code.addEventListener(MouseEvent.CLICK, openCodeTab);
+			
+			var media:MediaTabIcon = new MediaTabIcon();
+			media.x = 633;
+			media.y = 444;
+			addChild(media);
+			media.addEventListener(MouseEvent.CLICK, openMediaTab);
+			
 		}
 		public function addFocusEvents():void
 		{
@@ -259,7 +227,7 @@ package  //original
 			if (chatBox.htmlText.length < 100)
 			{
 				if (SaveSystem.getCurrentSlot().read("SeenIntro") == undefined)
-					displayMessage('<font color="#CC0033" size="13">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
+					displayMessage('<font color="#CC0033">[Profusion Dev Team] Welcome to the Game Developer Chat Room. If you want to know about how to make games or ask questions to developers you are in the right place! If you are here to annoy other users, please save yourself the trouble. Some helpful links can be found in the top right corner. Enjoy your stay, '  + Kong.userName + ".</font>");
 					SaveSystem.getCurrentSlot().write("SeenIntro", true);
 					SaveSystem.saveCurrentSlot();
 				//displayMessage('<font color="#CC0033" size="12">[Profusion Dev Team] Send Code Box Data by just pasting the short-link generated after clicking \"Post Code\"</font>');
@@ -361,13 +329,13 @@ package  //original
 			
 			if (m.indexOf("/unicorn") == 0) //unicorn
 			{
-				displayMessage('<font size="13"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> ' + "Believe!" + '</font>');
+				displayMessage('<font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> ' + "Believe!");
 				Kong.stats.submit("UnicornsBelievedIn", 1);
 				return;
 			}
 			if (m.indexOf("/unicron") == 0) //unicron
 			{
-				displayMessage('<font size="13"><font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> imma firin mah unicron!</font>');
+				displayMessage('<font color="#CC0033"><b>[' + "Unicorn" + ']</b></font> imma firin mah unicron!');
 				Kong.stats.submit("UnicronsBelievedIn", 1);
 				return;
 			}
@@ -380,18 +348,18 @@ package  //original
 			{
 				if (!(isUserMod(Kong.userName) || isUserAdmin(Kong.userName)))
 				{
-					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Only mods and admins can start polls" + '</font>');
+					displayMessage('<font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Only mods and admins can start polls");
 					return;
 				}
 				if (poll)
 				{
-					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "You already have a poll in progress" + '</font>');
+					displayMessage('<font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "You already have a poll in progress");
 					return;
 				}
 				var newPoll:Poll = Poll.parsePoll(m);
 				if (newPoll == null)
 				{
-					displayMessage('<font size="13"><font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Invalid Poll" + '</font>');
+					displayMessage('<font color="'+pollColor+'"><b>[' + "Vote" + ']</b></font> ' + "Invalid Poll");
 					return;
 				}
 				else
@@ -411,7 +379,7 @@ package  //original
 				}
 				else
 				{
-					displayMessage('<font size="13"><font color="' + pollColor + '"><b>[' + "Vote" + ']</b></font> ' + "No poll is running" + '</font>');
+					displayMessage('<font color="' + pollColor + '"><b>[' + "Vote" + ']</b></font> ' + "No poll is running");
 					return;
 				}
 			}
@@ -480,7 +448,7 @@ package  //original
 			
 			if(!Main.connection.connected)
 			{
-				displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
+				displayMessage('<font color="#FF0000">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 				return;
 			}
 			
@@ -490,11 +458,11 @@ package  //original
 		
 		private function deleteSuccess(o:DatabaseObject):void 
 		{
-			displayMessage('<font color="#FF0000" size="13">[Query]</font> Dumped User Indexes' + o);
+			displayMessage('<font color="#FF0000">[Query]</font> Dumped User Indexes' + o);
 		}
 		private function deleteFailure(e:PlayerIOError):void 
 		{
-			displayMessage('<font color="#FF0000" size="13">[Query]</font> ' + e.message);
+			displayMessage('<font color="#FF0000">[Query]</font> ' + e.message);
 		}
 		
 		private function traceUserData(e:Event):void 
@@ -504,7 +472,7 @@ package  //original
 			
 			if(playerData.success)
 			{
-				displayMessage('<font color="#FF0000" size="13">[Query]</font> User Data Retrieved: Name: ' + playerData.username + "  Id: " + playerData.user_id);
+				displayMessage('<font color="#FF0000">[Query]</font> User Data Retrieved: Name: ' + playerData.username + "  Id: " + playerData.user_id);
 			}
 			
 			return;
@@ -563,7 +531,7 @@ package  //original
 					//TODO Stop reconnection timer
 					PlayTimer.stopReconnection();
 					Main.connection.disconnect();
-					displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
+					displayMessage('<font color="#FF0000">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
 					//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 					return;
 				}
@@ -573,7 +541,7 @@ package  //original
 					//TODO Stop reconnection timer
 					PlayTimer.stopReconnection();
 					Main.connection.disconnect();
-					displayMessage('<font color="#FF0000" size="13">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
+					displayMessage('<font color="#FF0000">[System]</font> System has been forced to disconnect you. Please refresh.</font>');
 					//displayMessage('<font color="#FF0000" size="13">[System]</font> It seems you are not connected. Please wait for GDR to establish a new connection. If GDR is unable to reconnect, please refresh.');
 					return;
 				}
@@ -593,7 +561,7 @@ package  //original
 						//userIsSilenced = true;
 						PlayTimer.stopReconnection();
 						Main.connection.disconnect();
-						displayMessage('<font color="#FF0000" size="13">[System]</font> Account Permabanned</font>');
+						displayMessage('<font color="#FF0000">[System]</font> Account Permabanned</font>');
 						banUser();
 					}
 					else
@@ -611,7 +579,7 @@ package  //original
 					for (var i:int = 0; i < lines.length; i++)
 					{
 						if(lines[i].length > 0)
-							displayMessage('<font size="13"><font color="'+pollColor+'"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">Vote</a>]</b></font> ' + lines[i] + '</font>');
+							displayMessage('<font color="'+pollColor+'"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">Vote</a>]</b></font> ' + lines[i]);
 					}
 					return;
 				}
@@ -664,7 +632,7 @@ package  //original
 					{
 						if (words[j].indexOf("http://") == 0 || words[j].indexOf("www.") == 0 || words[j].indexOf("https://") == 0) //grab any codeD's on the line. Could be more than 1.
 						{
-							words[j] = '<font color="#0000FF"><a href=\"event:' + words[j] + '">' + words[j] + '</a></font>';
+							words[j] = '<font color="#0000FF"><a href=\"event:' + words[j].replace(/"/g,"&quot;") + '">' + words[j] + '</a></font>';
 						}
 					}
 					message = words.join(" ");
@@ -693,7 +661,7 @@ package  //original
 				{
 					words = message.split(" ", 2);
 					var restOfMessage2:String = message.substr(message.indexOf(words[0]) + words[0].length);
-					displayMessage('<font size="13"><b><font color="#FF0000">[<a href=\"event:@nameSystem">System</a>]</font> ' + restOfMessage2 + '</b></font>');
+					displayMessage('<b><font color="#FF0000">[<a href=\"event:@nameSystem">System</a>]</font> ' + restOfMessage2 + '</b>');
 					return;
 				}
 				
@@ -754,31 +722,13 @@ package  //original
 				
 				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
-				displayMessage('<font size="13"><font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).getColor().substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message + '</font>'); //display the message
+				displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).getColor().substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message); //display the message
 				
-				/*
-				numMessages++;
-				if (numMessages % 2 == 0)
-				{
-					displayMessage('Message Restore Point. Type /show to see all hidden messages.</font>' + '\n'); //display the message
-					
-					if (numMessagesHidden != 0)
-					{
-						var index:int = chatBox.htmlText.indexOf('Message Restore Point',10);
-						//displayMessage("Found at :" + index);
-						hiddenMessages += chatBox.htmlText.substring(0, index);
-						chatBox.htmlText = chatBox.htmlText.substring(index);
-					}
-					numMessagesHidden++;
-				}
-				*/
-				//StringUtil.neutralizeHTML(hiddenMessages);
-				//displayMessage("HIDDEN MESSAGE:" + hiddenMessages + "   numMessagedHidden:" + numMessagesHidden);
 			} 
 			catch (e:Error)
 			{
 				trace("[onMessage] Error: " + e);
-				displayMessage('<font size="13"><font color="#FF00FF"><b>[<a href=\"event:@nameERROR_CAUGHT">ERROR_CAUGHT</a>]</b></font> ' + e + '</font>'); //display the message
+				displayMessage('<font color="#FF00FF"><b>[<a href=\"event:@nameERROR_CAUGHT">ERROR_CAUGHT</a>]</b></font> ' + e); //display the message
 			}
 		}
 		
@@ -911,10 +861,6 @@ package  //original
 				sendMessage(inputBox.text);
 			}
 		}
-		public function mDownOnSend(e:MouseEvent):void
-		{
-			sendMessage(inputBox.text);
-		}
 		
 		
 		
@@ -963,6 +909,9 @@ package  //original
 		public function openCodeTab(e:MouseEvent):void {
 			showTab("code");
 		}
+		public function openMediaTab(e:MouseEvent):void {
+			showTab("media");
+		}
 		public function showTab(t:String):void
 		{
 			if (t == "code")
@@ -972,6 +921,10 @@ package  //original
 			else if (t == "link")
 			{
 				tabLinks.handleLabelClick();
+			}
+			else if (t == "media")
+			{
+				
 			}
 		}
 		public function getUserNameFromId(id:String):String {

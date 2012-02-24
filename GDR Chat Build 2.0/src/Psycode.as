@@ -2460,21 +2460,59 @@ class TextEditor extends TextEditorBase {
     }
 }
 
-    
 
-class TabViewItem extends Sprite {
-    private var label:TextField;
-    private var closeButton:SimpleButton;
+
+
+import flash.display.*;
+import flash.events.*;
+import flash.geom.*;
+import flash.text.*;
+import flash.utils.Dictionary;
+import skyboy.interfaces.tabbar.*;
+import skyboy.components.TabBar;
+class CloseButton extends Sprite implements IHover {
+	private var cont:ITab;
+	public var upState:DisplayObject, overState:DisplayObject;
+	public function CloseButton(container:ITab):void {
+		cont = container;
+		var u:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xEFEFEF);
+        var o:ShapeColorData = new ShapeColorData(new Shape(), 0x990000, 0xFFFFFF);
+		graphics.beginFill(0, 0);
+        graphics.drawRect(-6, -6, 12, 12);
+		graphics.endFill();
+		
+        for each (var shape:ShapeColorData in [u, o]) {
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(-2, -6, 4, 12);
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(-6, -2, 12, 4);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(-1, -5, 2, 10);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(-5, -1, 10, 2);
+        }
+        
+        upState = u.shape;
+        overState = o.shape;
+		addChild(upState).x = 1;
+	}
+	public function hover(over:Boolean):void {
+		if (!cont.closed()) {
+			if (over) {
+				if (upState.parent == this) removeChild(upState);
+				addChild(overState).x = 1;
+			} else {
+				if (overState.parent == this) removeChild(overState);
+				addChild(upState).x = 1;
+			}
+		}
+	}
+	
+}
+    
+class TabViewItem extends Sprite implements ITab, IHover {
     public var content:DisplayObject;
-    
-    public function get title():String {
-        return label.text;
-    }
-    public function set title(value:String):void {
-        label.text = value;
-        updateView();
-    }
-    
+	private static var X:Number = -Infinity, lX:TabViewItem;
     public function TabViewItem(content:DisplayObject, title:String):void {
         var fmt:TextFormat = new TextFormat("_sans");
         fmt.leftMargin = 4;
@@ -2486,65 +2524,285 @@ class TabViewItem extends Sprite {
         addChild(label);
         
         closeButton = createCloseButton();
-        closeButton.addEventListener(MouseEvent.CLICK, closeButtonClickHandler);
         addChild(closeButton);
         
         this.title = title;
         this.content = content;
     }
-    
+	private var label:TextField;
+    private var closeButton:DisplayObject;
+	private var _lastTab:ITab;
+	private var _over:Boolean, selected:Boolean, _closed:Boolean;
+	public function get lastTab():ITab {
+		return _lastTab;
+	}
+	public function set lastTab(value:ITab):void {
+		_lastTab = value;
+	}
+    public function get title():String {
+        return label.text;
+    }
+    public function set title(value:String):void {
+        label.text = value;
+        updateView();
+    }
+    public function select():void {
+		if (_closed) return;
+		dispatchEvent(new MouseEvent(MouseEvent.CLICK, false));
+		selected = true;
+		updateView();
+	}
+	public function hover(over:Boolean):void {
+		_over = over;
+		updateView();
+	}
+	public function deselect():void {
+		selected = false;
+		updateView();
+	}
+	public function close():void {
+		_closed = true;
+		dispatchEvent(new Event(Event.CLOSE));
+		if (this == lX) {
+			lX = null;
+			X = -Infinity;
+		}
+	}
+	public function closed():Boolean {
+		return _closed;
+	}
+	public function closeable():Boolean {
+		return true;
+	}
+	public function pointCloses(x:Number, y:Number):Boolean {
+		return closeButton.getRect(parent).containsPoint(new Point(x, y));
+	}
     private function updateView():void {
-        label.width = Math.max(60, Math.min(140, label.textWidth + 30));
+		var w:Number = Math.max(60, Math.min(140, label.textWidth + 30));
+        label.width = w;
         label.height = label.textHeight + 4;
         label.y = (20 - label.height) / 2;
         graphics.clear();
+        var mtx:Matrix = new Matrix();
+        mtx.createGradientBox(10, 20, Math.PI / 2);
+        graphics.beginGradientFill(GradientType.LINEAR, selected ? [/*0xD3DFEE*/0xFFFFFF, 0xC1CFDD] : _over ? [0xFCFCFC, 0xA1AFBD] : [0xEEEEEE, 0x818F9D], [1, 1], [0x00, 0xFF], mtx);
+        graphics.drawRect(0, 0, w, int(selected) + 19);
+		graphics.endFill();
         graphics.lineStyle(-1, 0x999999);
-        graphics.moveTo(label.width, 0);
-        graphics.lineTo(label.width, 22);
+		graphics.moveTo(0, 20);
+        graphics.lineTo(0, 0);
+        graphics.lineTo(w, 0);
+        graphics.lineTo(w, 20);
         
         closeButton.rotation = 45;
-        closeButton.x = label.width - 11;
-        closeButton.y = 11;
+        closeButton.x = w-10;
+        closeButton.y = 10;
     }
-        
-    private function createCloseButton():SimpleButton {
-        var u:Shape = new Shape();
-        var o:Shape = new Shape();
-        
-        o.graphics.beginFill(0x666666);
-        o.graphics.drawCircle(0, 0, 10);
-        for each (var shape:Shape in [u, o]) {
-            shape.graphics.beginFill(0x666666);
-            shape.graphics.drawRect(-2, -6, 4, 12);
-            shape.graphics.beginFill(0x666666);
-            shape.graphics.drawRect(-6, -2, 12, 4);
-            shape.graphics.beginFill(0xFFFFFF);
-            shape.graphics.drawRect(-1, -5, 2, 10);
-            shape.graphics.beginFill(0xFFFFFF);
-            shape.graphics.drawRect(-5, -1, 10, 2);
-        }
-        
-        var btn:SimpleButton = new SimpleButton();
-        btn.upState = u;
-        btn.overState = u;
-        btn.downState = u;
-        btn.hitTestState = o;
-        return btn;
-    }
-    
-    private function closeButtonClickHandler(event:MouseEvent):void {
-        dispatchEvent(new Event(Event.CLOSE));
-        event.stopPropagation();
+    private function createCloseButton():DisplayObject {
+		return new CloseButton(this);
     }
 }
 
 
-class TabView extends UIControl {
-    private var contentItemTable:Dictionary;
-    private var items:Array;
-    private var addButton:SimpleButton;
-	
-    public var _currentItem:TabViewItem;
+
+//skyboy
+class ScrollButton extends Sprite implements IButton, IHover {
+	public var upState:DisplayObject, overState:DisplayObject, disabledState:DisplayObject;
+	public function ScrollButton(left:Boolean):void {
+		var u:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xE0E0E0);
+        var o:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xFFFFFF);
+		var d:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xC1C1C1);
+		graphics.beginFill(0, 0);
+		graphics.drawRect(0, 19, 20+int(!left), 1);
+		graphics.lineStyle(-1, 0x999999);
+		graphics.drawRoundRectComplex(0, 0, 20, 20, int(left) * 4, int(!left) * 4, 0, 0);
+		graphics.endFill();
+		if (left) {
+			for each (var shape:ShapeColorData in [u, o, d]) {
+				shape.graphics.moveTo(0, 9);
+				shape.graphics.lineStyle(-1, shape.colors[0]);
+				shape.graphics.beginFill(shape.colors[1]);
+				shape.graphics.lineTo(8, 14);
+				shape.graphics.lineTo(10, 12);
+				shape.graphics.lineTo(4, 9);
+				shape.graphics.lineTo(10, 6);
+				shape.graphics.lineTo(8, 4);
+				shape.graphics.lineTo(0, 9);
+				shape.graphics.endFill();
+			}
+		} else {
+			for each (shape in [u, o, d]) {
+				shape.graphics.moveTo(10, 9);
+				shape.graphics.lineStyle(-1, shape.colors[0]);
+				shape.graphics.beginFill(shape.colors[1]);
+				shape.graphics.lineTo(2, 14);
+				shape.graphics.lineTo(0, 12);
+				shape.graphics.lineTo(6, 9);
+				shape.graphics.lineTo(0, 6);
+				shape.graphics.lineTo(2, 4);
+				shape.graphics.lineTo(10, 9);
+				shape.graphics.endFill();
+			}
+
+		}
+		
+        upState = u.shape;
+        overState = o.shape;
+		disabledState = d.shape;
+		addChild(upState);
+	}
+	private var _enabled:Boolean = true, _hover:Boolean = false;
+	public function disable():void {
+		hover(false);
+		if (upState.parent == this) removeChild(upState);
+		addChild(disabledState).y=1;
+		disabledState.x = (width - disabledState.width) * 0.5;
+		_enabled = false;
+	}
+	public function hover(over:Boolean):void {
+		_hover = over;
+		if (_enabled) {
+			if (over) {
+				if (upState.parent == this) removeChild(upState);
+				addChild(overState).y=1;
+				overState.x = (width - overState.width) * 0.5;
+			} else {
+				if (overState.parent == this) removeChild(overState);
+				addChild(upState).y=1;
+				upState.x = (width - upState.width) * 0.5;
+			}
+		}
+	}
+	public function enable():void {
+		_enabled = true;
+		if (disabledState.parent == this) removeChild(disabledState);
+		hover(_hover);
+	}
+	public function enabled():Boolean {
+		return _enabled;
+	}
+}
+class AddButton extends Sprite implements ITabButton, IHover {
+	private var cont:ITabView;
+	public var upState:DisplayObject, overState:DisplayObject;
+	public function AddButton(container:ITabView):void {
+		cont = container;
+		var u:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xE0E0E0);
+        var o:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xFFFFFF);
+		graphics.lineStyle(-1, 0x999999);
+		graphics.beginFill(0, 0);
+        graphics.drawRect(0, 0, 19, 20);
+		graphics.endFill();
+		/*
+		o.graphics.beginFill(0xF9F9F9);
+		o.graphics.drawRect( -4, 0, 18, 18);
+		o.graphics.endFill();//*/
+        for each (var shape:ShapeColorData in [u, o]) {
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(3, 4, 4, 10);
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(0, 7, 10, 4);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(4, 5, 2, 8);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(1, 8, 8, 2);
+			shape.graphics.endFill();
+        }
+        
+        upState = u.shape;
+        overState = o.shape;
+		hover(false);
+	}
+	public function newTab():ITab {
+		cont.dispatchEvent(new Event(Event.OPEN));
+		return null;
+	}
+	private var _enabled:Boolean = true, _hover:Boolean = false;
+	public function disable():void {
+		hover(false);
+		_enabled = false;
+	}
+	public function hover(over:Boolean):void {
+		_hover = over;
+		if (_enabled) {
+			if (over) {
+				if (upState.parent == this) removeChild(upState);
+				addChild(overState).y=1;
+				overState.x = 5;
+			} else {
+				if (overState.parent == this) removeChild(overState);
+				addChild(upState).y=1;
+				upState.x = 5;
+			}
+		}
+	}
+	public function enable():void {
+		_enabled = true;
+		hover(_hover);
+	}
+	public function enabled():Boolean {
+		return _enabled;
+	}
+}
+interface ITabView {
+	function addChild(child:DisplayObject):DisplayObject;
+	function dispatchEvent(event:Event):Boolean;
+	function removeChild(child:DisplayObject):DisplayObject;
+}
+class ShapeColorData {
+	public var shape:Shape;
+	public var graphics:Graphics;
+	public var colors:Vector.<int> = new Vector.<int>(1);
+	public function ShapeColorData(data:Shape, ...colors):void {
+		shape = data;
+		graphics = data.graphics;
+		colors.forEach(assignColors);
+	}
+	private function assignColors(c:uint, i:uint, _:Array):void {
+		colors[i] = c;
+	}
+}
+class TabListButton extends Shape implements /*ITabList,*/ IHover {
+	private var cont:ITabView;
+	private var _enabled:Boolean, _over:Boolean;
+	public function TabListButton(_cont:ITabView):void {
+		cont = _cont;
+		disable();
+	}
+	public function disable():void {
+		hover(false);
+		// disabled
+		_enabled = false;
+	}
+	public function hover(over:Boolean):void {
+		_over = over;
+		if (_enabled) {
+			if (over) {
+				
+			} else {
+				
+			}
+		}
+	}
+	public function enable():void {
+		_enabled = true;
+		hover(_over);
+	}
+	public function enabled():Boolean {
+		return _enabled;
+	}
+	public function listTabs(tabs:Array):void {
+		if (_enabled) {
+			
+		}
+	}
+}
+
+
+class TabView extends UIControl implements ITabView {
+	private var contentItemTable:Dictionary = new Dictionary;
+    private var _currentItem:TabViewItem, tabBar:TabBar, tabContainer:Sprite;
+	private var tabs:Vector.<TabViewItem> = new Vector.<TabViewItem>;
     public function get currentItem():TabViewItem {
         return _currentItem;
     }
@@ -2553,105 +2811,77 @@ class TabView extends UIControl {
             if (_currentItem) {
                 removeChild(_currentItem.content);
             }
-            _currentItem = value;
-            if (_currentItem) {
-                addChild(_currentItem.content);
-                updateView();
-            }
+            if (value && ! value.closed()) {
+				_currentItem = value;
+				if (!~tabs.indexOf(value)) {
+					tabs.push(value);
+					tabBar.addTab(value);
+				}
+				tabBar.focusTab(value);
+                addChild(value.content);
+            } else _currentItem = null;
+			updateView();
         }
     }
-    
     public function get selectedIndex():int {
-        return items.indexOf(currentItem);
+        return tabs.indexOf(currentItem);
     }
-    
     public function TabView() {
-        contentItemTable = new Dictionary();
-        items = new Array();
-        addButton = createAddButton();
-        addButton.addEventListener(MouseEvent.CLICK, addButtonClickHandler);
-        addChild(addButton);
+        var addButton:AddButton = new AddButton(this);
+		var lsb:IButton = new ScrollButton(true), rsb:IButton = new ScrollButton(false);
+		var tc:Sprite = new Sprite;
+		tabContainer = tc;
+		tabBar = new TabBar(lsb, rsb, addButton, tc);
+		addChild(tabBar);
+		tabBar.setScrollSpeed(45);
     }
-    
-    private function createAddButton():SimpleButton {
-        var u:Shape = new Shape();
-        var o:Shape = new Shape();
-        
-        o.graphics.beginFill(0x666666);
-        o.graphics.drawRoundRect(0, 0, 18, 18, 8);
-        o.graphics.beginFill(0xFFFFFF);
-        o.graphics.drawRoundRect(1, 1, 16, 16, 6);
-        for each (var shape:Shape in [u, o]) {
-            shape.graphics.beginFill(0x666666);
-            shape.graphics.drawRect(7, 4, 4, 10);
-            shape.graphics.beginFill(0x666666);
-            shape.graphics.drawRect(4, 7, 10, 4);
-            shape.graphics.beginFill(0xFFFFFF);
-            shape.graphics.drawRect(8, 5, 2, 8);
-            shape.graphics.beginFill(0xFFFFFF);
-            shape.graphics.drawRect(5, 8, 8, 2);
-        }
-        
-        var btn:SimpleButton = new SimpleButton();
-        btn.upState = u;
-        btn.overState = o;
-        btn.downState = o;
-        btn.hitTestState = o;
-        return btn;
-    }
-    
     public function addItem(content:DisplayObject, title:String):void {
         var item:TabViewItem = new TabViewItem(content, title);
         item.addEventListener(Event.CLOSE, itemCloseHandler);
         item.addEventListener(MouseEvent.CLICK, itemClickHandler);
-        items.push(item);
-        addChild(item);
         contentItemTable[content] = item;
         currentItem = item;
+		tabBar.addTab(item);
+		tabs.push(item);
         updateView();
     }
-    
     public function setTitle(content:DisplayObject, title:String):void {
         TabViewItem(contentItemTable[content]).title = title;
         updateView();
     }
-    
-    public function removeItem(content:DisplayObject):void {
-        var item:TabViewItem = contentItemTable[content];
-        items.splice(items.indexOf(item), 1);
-        removeChild(item);
-        delete contentItemTable[content];
-        if (currentItem == item) {
-            currentItem = items[0];
-        }
-        updateView();
+    public function removeItem(item:TabViewItem):void {
+		var i:int = tabs.indexOf(item);
+		if (~i) {
+			tabs.splice(i, 1);
+			tabBar.removeTab(item);
+			if (_currentItem == item) {
+				var t:TabViewItem = (item.lastTab as TabViewItem);
+				if (t && !t.closed()) currentItem = t;
+				else currentItem = null;
+			}
+			delete contentItemTable[item.content];
+			updateView();
+		}
     }
-    
     public function get count():int {
-        return items.length;
+        return tabs.length;
     }
-    
     public function getItemAt(index:int):DisplayObject {
-        return TabViewItem(items[index]).content;
+        return TabViewItem(tabs[index]).content;
     }
-	
-	 public function getTabViewItemAt(index:int):TabViewItem {
-        return TabViewItem(items[index]);
+	public function getTabViewItemAt(index:int):TabViewItem {
+        return TabViewItem(tabs[index]);
     }
-    
     private function itemClickHandler(event:MouseEvent):void {
         currentItem = TabViewItem(event.currentTarget);
     }
-    
     private function itemCloseHandler(event:Event):void {
-        removeItem(TabViewItem(event.currentTarget).content);
+        removeItem(TabViewItem(event.currentTarget));
     }
-    
-    private function addButtonClickHandler(event:MouseEvent):void {
-        dispatchEvent(new Event(Event.OPEN));
-    }
-    
     private function updateView():void {
+		tabBar.x = 2;
+		tabBar.width = width - 4;
+		tabBar.y = 3;
         graphics.clear();
         graphics.beginFill(0x999999);
         graphics.drawRoundRect(0, 0, width, height, 8);
@@ -2663,41 +2893,32 @@ class TabView extends UIControl {
         graphics.drawRect(1, 23, width - 2, height - 24);
         graphics.beginFill(0xFFFFFF);
         graphics.drawRect(4, 26, width - 8, height - 30);
+		graphics.endFill();
+		
+		tabBar.updateTabPositions();
         
-        var left:Number = 1;
-        for each (var item:TabViewItem in items) {
-            item.x = left;
-            item.y = 1;
-            left += item.width;
-        }
-        addButton.x = left + 3;
-        addButton.y = 2;
-        
-        if (currentItem) {
-            var mtx:Matrix = new Matrix();
-            mtx.createGradientBox(10, 20, Math.PI / 2);
-            graphics.beginGradientFill(GradientType.LINEAR, [0xD3DFEE, 0xC1CFDD], [1, 1], [0x00, 0xFF], mtx);
-            graphics.drawRect(currentItem.x, currentItem.y, currentItem.width, currentItem.height);
-            
-            currentItem.content.x = 4;
-            currentItem.content.y = 26;
-            if (currentItem.content is UIControl) {
-                UIControl(currentItem.content).setSize(width - 8, height - 30);
-            }
+        if (_currentItem) {
+            var dsp:DisplayObject = _currentItem.content;
+            dsp.x = 4;
+            dsp.y = 26;
+            if (dsp is UIControl) {
+                (dsp as UIControl).setSize(width - 8, height - 30);
+            } else {
+				dsp.width = width - 8;
+				dsp.height = height - 30;
+			}
         }
     }
-    
-    protected override function updateSize():void {
-        super.updateSize();
+	protected override function updateSize():void {
         updateView();
-    }
+	}
 }
 
 
 import playerio.DatabaseObject;
 import flash.utils.getTimer;
 import ugLabs.net.Kong;
-//UG Added
+// UG Added
 class BottomUIBar extends UIControl {
 	
 	private var loadButton:SimpleButton;
@@ -2747,24 +2968,23 @@ class BottomUIBar extends UIControl {
 	
 	private function postClickHandler(e:MouseEvent):void 
 	{
-		if(TextEditor(tabView.currentItem.content).text.length < 10)
-		{
-			return;
-		}
+		var E:TextEditor = tabView.currentItem.content as TextEditor;
+		if(!E || E.text.length < 10) return;
 		var key:String = "codeD" + Kong.userName.substr(0, 7) + getTimer();
-		Main.client.bigDB.createObject("CodeBox", key, { data:TextEditor(tabView.currentItem.content).text }, textPostingCallback, textPostingError);
+		tabView.setTitle(E, key);
+		Main.client.bigDB.createObject("CodeBox", key, { data:E.text }, textPostingCallback, textPostingError);
 		KongChat.log("Posted code");
 	}
 	public function textPostingError(e:*):void
 	{
-		//error in trying to add to database
+		// error in trying to add to database
 		textField.text = e.toString();
 		
 		KongChat.log("Error in posting code to database" );
 	}
 	public function textPostingCallback(o:DatabaseObject):void
 	{
-		//post the short url in the loadField
+		// post the short url in the loadField
 		textField.text = o.key;
 		KongChat.log("Key is " + o.key);
 		Main.chatDisplay.inputBox.appendText(" " + o.key + " ");
@@ -2784,7 +3004,7 @@ class BottomUIBar extends UIControl {
 			return;
 		}
 		
-		//loop to see if it already exists
+		// loop to see if it already exists
 		for (var i:int = 0; i < tabView.count; i++)
 		{
 			if (tabView.getTabViewItemAt(i).title == key)
@@ -2877,10 +3097,10 @@ class BottomUIBar extends UIControl {
 		field.editable = true;
 		field.setStyle("backgroundColor", 0xD3DFEE);
 		field.setStyle("borderColor", 0xC1CFDD);
-		//field.background = true;
-		//field.backgroundColor = 0xD3DFEE;
-		//field.border = true;
-		//field.borderColor = 0xC1CFDD;
+		// field.background = true;
+		// field.backgroundColor = 0xD3DFEE;
+		// field.border = true;
+		// field.borderColor = 0xC1CFDD;
 		field.blendMode = 'overlay';
 		field.addEventListener(FocusEvent.FOCUS_IN, fieldFocusIn);
 		field.addEventListener(FocusEvent.FOCUS_OUT, fieldFocusOut);
@@ -2908,7 +3128,6 @@ class BottomUIBar extends UIControl {
         
        return u;
 	}
-
 }
 
 

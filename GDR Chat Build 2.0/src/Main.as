@@ -27,7 +27,7 @@
 	{
 		public static var roomName:String = Main.regRoomName;
 		public static var collabRoomName:String = "{collabz2}";
-		public static var regRoomName:String = "{main2}";
+		public static var regRoomName:String = "{main1}";
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
 		public static var playerList:PlayerList;

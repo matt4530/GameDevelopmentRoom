@@ -92,7 +92,7 @@ package
 			infoIcon.x = 228;
 			infoIcon.y = 11;
 			
-			infoIcon.addEventListener(MouseEvent.CLICK, showUserInfo);
+			infoIcon.addEventListener(MouseEvent.CLICK, gotoProfile);
 			infoIcon.buttonMode = true;
 			
 			addEventListener(Event.ADDED_TO_STAGE, init);
@@ -158,7 +158,7 @@ package
 			}
 			
 			addChild(infoIcon);
-			field.addEventListener(MouseEvent.CLICK, gotoProfile);
+			field.addEventListener(MouseEvent.CLICK, showUserInfo);
 			
 		}
 		
@@ -205,12 +205,15 @@ package
 		
 		private function showUserInfo(e:MouseEvent):void 
 		{
-			Main.chatDisplay.userProfilePanel.changeProfile(UserName);
+			if (e.currentTarget != silenceIcon && e.currentTarget != infoIcon)
+			{
+				Main.chatDisplay.userProfilePanel.changeProfile(UserName);
+			}
 		}
 		
 		public function gotoProfile(e:MouseEvent):void
 		{
-			if (e.currentTarget != silenceIcon && e.currentTarget != infoIcon)
+			if (e.currentTarget == infoIcon)
 			{
 				navigateToURL(new URLRequest("http://www.kongregate.com/accounts/" + UserName));
 			}
@@ -276,8 +279,8 @@ package
 		{
 			removeEventListener(MouseEvent.ROLL_OVER, rOver);
 			removeEventListener(MouseEvent.ROLL_OUT, rOut);
-			field.removeEventListener(MouseEvent.CLICK, gotoProfile);
-			infoIcon.removeEventListener(MouseEvent.CLICK, showUserInfo);
+			field.removeEventListener(MouseEvent.CLICK, showUserInfo);
+			infoIcon.removeEventListener(MouseEvent.CLICK, gotoProfile);
 			if (silenceIcon)
 			{
 				silenceIcon.removeEventListener(MouseEvent.CLICK, toggleSilencePlayer);
