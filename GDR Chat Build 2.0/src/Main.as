@@ -9,6 +9,7 @@
 	import flash.display.StageQuality;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.net.SharedObject;
 	import flash.utils.setTimeout;
 	import playerio.Client;
@@ -99,12 +100,17 @@
 			var approved:Boolean = SiteLock.checkURL(false);
 			if (SiteLock.isLocal())
 			{
-				initChatManagers();
+				//initChatManagers();
 				TextEffect.add("Denied Access...............");
 				TextEffect.add("\n");
 				TextEffect.add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
 				TextEffect.add("\n");
+				TextEffect.add("\nLoading Local Mode");
+				TextEffect.add("\n");
+				
 				debugField.selectable = true;
+				
+				connectToKongregate();
 			}
 			else if (approved)
 			{
@@ -145,7 +151,22 @@
 				TextEffect.add("\n");
 				TextEffect.addGroup("...................................");
 				TextEffect.add("\n");
-				TextEffect.setAllCompleteCallback(forceGuestLogin);
+				if (!SiteLock.isLocal())
+				{
+					TextEffect.setAllCompleteCallback(forceGuestLogin);
+				}
+				else
+				{
+					//allow credential input
+					TextEffect.add("Dev Login format:    Userid <space> token    Press Enter to login.\n");
+					TextEffect.add("Dev Login> ");
+					debugField.editable = true;
+					stage.focus = debugField.textField;
+					setTimeout(function():void{
+						debugField.textField.setSelection(debugField.textField.length, debugField.textField.length);
+						stage.addEventListener(KeyboardEvent.KEY_DOWN, kDown);
+					},100);
+				}
 				return;
 			}
 			
@@ -174,6 +195,39 @@
 			
 			
 			displayConnectedUserData();
+		}
+		
+		private function kDown(e:KeyboardEvent):void 
+		{
+			if (e.keyCode == 13)
+			{
+				var interestArea:String = debugField.text.substring(debugField.text.lastIndexOf("Dev Login> ") + "Dev Login> ".length);
+				//trace(interestArea);
+				//return;
+				var fakeID:String = interestArea.split(" ")[0];
+				var fakeToken:String = interestArea.split(" ")[1];
+				Kong.userName = "[LocalDev]" + fakeID;
+				//trace(fakeID, fakeToken);
+				//return;
+				try
+				{
+					PlayerIO.quickConnect.kongregateConnect(
+															stage,
+															"bettergdr-4dxwzr0qd0ycaegdgynhww",
+															//"gdr-mwvmnfxwn0mxd2fbzfd4a",
+															fakeID,
+															fakeToken,
+															connectedToPlayerIO,
+															connectionFailedToPlayerIO
+															);
+				}
+				catch (e:Error)
+				{
+					TextEffect.addGroup("Server Connection Failed. Please refresh");
+					TextEffect.add("\n");
+					return;
+				}
+			}
 		}
 		public function displayConnectedUserData():void
 		{

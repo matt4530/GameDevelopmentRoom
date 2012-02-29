@@ -344,6 +344,11 @@ package  //original
 				KongChat.init();
 				return;
 			}
+			if (m.indexOf("/dev") == 0) //debug
+			{
+				displayMessage('<font color="#CC0033"><b>[System]</b></font> Do NOT share this token with any user. <b>Users can fake your login if you share this token with them.</b> (On accidental sharing, change your Kongregate password immediately to generate a new token)\nUSERID: ' + Kong.userId +'\nTOKEN: ' + Kong.userToken+'\n\nAbuse of the development feature will result in a ban on your account regardless of mod/dev/reg account type.');
+				return;
+			}
 			if (m.indexOf("/vote") == 0)
 			{
 				if (!(isUserMod(Kong.userName) || isUserAdmin(Kong.userName)))
