@@ -23,6 +23,8 @@ package  //original
 	import ugLabs.net.Kong;
 	import ugLabs.net.SaveSystem;
 	import ugLabs.util.StringUtil;
+	import senekis.MediaHandler;
+	import senekis.MediaEvent;
 	/**
 	 * ...
 	 * @author UnknownGuardian
@@ -35,6 +37,7 @@ package  //original
 		public var inputBox:TextInput;
 		public var tabCode:Psycode;// TabCode;
 		public var tabLinks:LinksTab;
+		public var tabMedia:MediaHandler;
 		public var userProfilePanel:ProfilePanel;
 		
 		public var soundMuted:int = 0; // 0  = all, 1 == name, 2 == none
@@ -171,6 +174,11 @@ package  //original
 			tabCode.x = stage.stageWidth;
 			addChild(tabCode);
 			
+			tabMedia=new MediaHandler;
+			tabMedia.x=stage.stageWidth;
+			addChild(tabMedia);		
+			tabMedia.addEventListener(MediaEvent.SHARE,shareMedia);
+			
 			var link:LinksTabIcon = new LinksTabIcon();
 			link.x = 633;
 			link.y = 226;
@@ -190,6 +198,17 @@ package  //original
 			media.addEventListener(MouseEvent.CLICK, openMediaTab);
 			
 		}
+		
+		private function shareMedia(e:MediaEvent):void{
+			var m:String;
+			if(e.mode=="swf")m="1";
+			else if(e.mode==".png")m="2";
+			else if(e.mode==".jpg")m="3";
+			else if(e.mode==".bmp")m="4";
+			else if(e.mode==".gif")m="5";
+			inputBox.text+="codeM"+m+tabMedia.url.substring(tabMedia.url.lastIndexOf("/")+1,tabMedia.url.lastIndexOf("."));
+		}
+		
 		public function addFocusEvents():void
 		{
 			stage.addEventListener(Event.ACTIVATE, gainedFocus);
@@ -630,6 +649,19 @@ package  //original
 					message = words.join(" ");
 				}
 				
+				if(message.indexOf("codeM") != -1) 
+				{
+					words = message.split(" ");
+					for (var cm:int = 0; cm < words.length; cm++)
+					{
+						if (words[cm].indexOf("codeM") == 0) 
+						{
+							words[cm] = '<b><i><font color="#0078FF"><a href=\"event:' + words[cm] + '">' + words[cm] + '</a></font></i></b>';
+						}
+					}
+					message = words.join(" ");
+				}
+				
 				if (message.indexOf("http") != -1 || message.indexOf("www.") != -1)
 				{
 					words = message.split(" ");
@@ -834,6 +866,11 @@ package  //original
 				//p.loadField.text = e.text;
 				//p.loadCode(null);
 			}
+			else if(e.text.indexOf("codeM")!=-1)
+			{
+				if(!tabMedia.isExpanded)tabMedia.handleLabelClick();
+				tabMedia.loadURL(e.text);
+			}
 			else if ( e.text.indexOf("@name") != -1)
 			{
 				inputBox.appendText( e.text.substring(e.text.indexOf("@name") + 5) + " ");
@@ -929,7 +966,7 @@ package  //original
 			}
 			else if (t == "media")
 			{
-				
+				tabMedia.handleLabelClick();
 			}
 		}
 		public function getUserNameFromId(id:String):String {

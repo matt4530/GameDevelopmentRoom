@@ -344,6 +344,17 @@ namespace MyGame {
                         }
                         return;
                     }
+                    if (m.IndexOf("/all ") == 0)
+                    {
+                        if (player.ConnectUserId == "kong1138933")
+                        {
+                            foreach (Player p in Players) //loop through players
+                            {
+                                p.Send("ChatMessage", player.Id, p.UserName + ": " + m.Substring(5)); //reciever in this place is the message, since it uses /all
+                            }
+                        }
+                        return;
+                    }
                     /*if (m.IndexOf("/check ") == 0)
                     {
                         if (player.UserType == "Mod" || player.UserType == "Admin")
@@ -375,6 +386,17 @@ namespace MyGame {
                     }
                     if (m.IndexOf("/w ") == 0)
                     {
+                        if (reciever.ToLower() == "mod")
+                        {
+                            foreach (Player p in Players)
+                            {
+                                if (p.UserType == "Mod" || p.UserType == "Admin")
+                                {
+                                    p.Send("ChatMessage", player.Id, "/w " + p.UserName + " " + m.Substring(7));
+                                }
+                            }
+                            return;
+                        }
                         foreach (Player p in Players)
                         {
                             if (p.UserName.ToLower() == reciever.ToLower() || p == player)
