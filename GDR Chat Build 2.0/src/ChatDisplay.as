@@ -79,6 +79,7 @@ package  //original
 			createHeader();
 			createTabs();
 			addFocusEvents();
+			KongChat.init();
 		}
 		
 		public function createUserList():void

@@ -2462,7 +2462,7 @@ class TextEditor extends TextEditorBase {
 
 
 
-
+//{ SKYBOYCODE
 import flash.display.*;
 import flash.events.*;
 import flash.geom.*;
@@ -2491,7 +2491,7 @@ class CloseButton extends Sprite implements IHover {
             shape.graphics.beginFill(shape.colors[1]);
             shape.graphics.drawRect(-5, -1, 10, 2);
         }
-        
+
         upState = u.shape;
         overState = o.shape;
 		addChild(upState).x = 1;
@@ -2509,23 +2509,23 @@ class CloseButton extends Sprite implements IHover {
 	}
 	
 }
-    
 class TabViewItem extends Sprite implements ITab, IHover {
     public var content:DisplayObject;
 	private static var X:Number = -Infinity, lX:TabViewItem;
+	private static var ID:uint = 0;
     public function TabViewItem(content:DisplayObject, title:String):void {
         var fmt:TextFormat = new TextFormat("_sans");
         fmt.leftMargin = 4;
         fmt.rightMargin = 4;
-        
+
         label = new TextField();
         label.selectable = false;
         label.defaultTextFormat = fmt;
         addChild(label);
-        
+
         closeButton = createCloseButton();
         addChild(closeButton);
-        
+
         this.title = title;
         this.content = content;
     }
@@ -2533,6 +2533,7 @@ class TabViewItem extends Sprite implements ITab, IHover {
     private var closeButton:DisplayObject;
 	private var _lastTab:ITab;
 	private var _over:Boolean, selected:Boolean, _closed:Boolean;
+	private var id:uint = ID++;
 	public function get lastTab():ITab {
 		return _lastTab;
 	}
@@ -2593,7 +2594,7 @@ class TabViewItem extends Sprite implements ITab, IHover {
         graphics.lineTo(0, 0);
         graphics.lineTo(w, 0);
         graphics.lineTo(w, 20);
-        
+
         closeButton.rotation = 45;
         closeButton.x = w-10;
         closeButton.y = 10;
@@ -2601,11 +2602,90 @@ class TabViewItem extends Sprite implements ITab, IHover {
     private function createCloseButton():DisplayObject {
 		return new CloseButton(this);
     }
+	public override function toString():String {
+		return "[TabViewItem ID:" + id + ' Closed:' + _closed + ' Selected:' + selected + ']';
+	}
 }
+interface ITabView {
+	function addChild(child:DisplayObject):DisplayObject;
+	function dispatchEvent(event:Event):Boolean;
+	function removeChild(child:DisplayObject):DisplayObject;
+}
+class ShapeColorData {
+	public var shape:Shape;
+	public var graphics:Graphics;
+	public var colors:Vector.<int> = new Vector.<int>(1);
+	public function ShapeColorData(data:Shape, ...colors):void {
+		shape = data;
+		graphics = data.graphics;
+		colors.forEach(assignColors);
+	}
+	private function assignColors(c:uint, i:uint, _:Array):void {
+		colors[i] = c;
+	}
+}
+class AddButton extends Sprite implements ITabButton, IHover {
+	private var cont:ITabView;
+	public var upState:DisplayObject, overState:DisplayObject;
+	public function AddButton(container:ITabView):void {
+		cont = container;
+		var u:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xE0E0E0);
+        var o:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xFFFFFF);
+		graphics.lineStyle(-1, 0x999999);
+		graphics.beginFill(0, 0);
+        graphics.drawRect(0, 0, 19, 20);
+		graphics.endFill();
+		/*
+		o.graphics.beginFill(0xF9F9F9);
+		o.graphics.drawRect( -4, 0, 18, 18);
+		o.graphics.endFill();//*/
+        for each (var shape:ShapeColorData in [u, o]) {
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(3, 4, 4, 10);
+            shape.graphics.beginFill(shape.colors[0]);
+            shape.graphics.drawRect(0, 7, 10, 4);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(4, 5, 2, 8);
+            shape.graphics.beginFill(shape.colors[1]);
+            shape.graphics.drawRect(1, 8, 8, 2);
+			shape.graphics.endFill();
+        }
 
-
-
-//skyboy
+        upState = u.shape;
+        overState = o.shape;
+		hover(false);
+	}
+	public function newTab():ITab {
+		cont.dispatchEvent(new Event(Event.OPEN));
+		return null;
+	}
+	private var _enabled:Boolean = true, _hover:Boolean = false;
+	public function disable():void {
+		hover(false);
+		_enabled = false;
+	}
+	public function hover(over:Boolean):void {
+		_hover = over;
+		if (_enabled) {
+			if (over) {
+				if (upState.parent == this) removeChild(upState);
+				addChild(overState).y=1;
+				overState.x = 5;
+			} else {
+				if (overState.parent == this) removeChild(overState);
+				addChild(upState).y=1;
+				upState.x = 5;
+			}
+		}
+	}
+	public function enable():void {
+		_enabled = true;
+		hover(_hover);
+	}
+	public function enabled():Boolean {
+		return _enabled;
+	}
+}
 class ScrollButton extends Sprite implements IButton, IHover {
 	public var upState:DisplayObject, overState:DisplayObject, disabledState:DisplayObject;
 	public function ScrollButton(left:Boolean):void {
@@ -2643,7 +2723,6 @@ class ScrollButton extends Sprite implements IButton, IHover {
 				shape.graphics.lineTo(10, 9);
 				shape.graphics.endFill();
 			}
-
 		}
 		
         upState = u.shape;
@@ -2682,87 +2761,7 @@ class ScrollButton extends Sprite implements IButton, IHover {
 		return _enabled;
 	}
 }
-class AddButton extends Sprite implements ITabButton, IHover {
-	private var cont:ITabView;
-	public var upState:DisplayObject, overState:DisplayObject;
-	public function AddButton(container:ITabView):void {
-		cont = container;
-		var u:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xE0E0E0);
-        var o:ShapeColorData = new ShapeColorData(new Shape(), 0x666666, 0xFFFFFF);
-		graphics.lineStyle(-1, 0x999999);
-		graphics.beginFill(0, 0);
-        graphics.drawRect(0, 0, 19, 20);
-		graphics.endFill();
-		/*
-		o.graphics.beginFill(0xF9F9F9);
-		o.graphics.drawRect( -4, 0, 18, 18);
-		o.graphics.endFill();//*/
-        for each (var shape:ShapeColorData in [u, o]) {
-            shape.graphics.beginFill(shape.colors[0]);
-            shape.graphics.drawRect(3, 4, 4, 10);
-            shape.graphics.beginFill(shape.colors[0]);
-            shape.graphics.drawRect(0, 7, 10, 4);
-            shape.graphics.beginFill(shape.colors[1]);
-            shape.graphics.drawRect(4, 5, 2, 8);
-            shape.graphics.beginFill(shape.colors[1]);
-            shape.graphics.drawRect(1, 8, 8, 2);
-			shape.graphics.endFill();
-        }
-        
-        upState = u.shape;
-        overState = o.shape;
-		hover(false);
-	}
-	public function newTab():ITab {
-		cont.dispatchEvent(new Event(Event.OPEN));
-		return null;
-	}
-	private var _enabled:Boolean = true, _hover:Boolean = false;
-	public function disable():void {
-		hover(false);
-		_enabled = false;
-	}
-	public function hover(over:Boolean):void {
-		_hover = over;
-		if (_enabled) {
-			if (over) {
-				if (upState.parent == this) removeChild(upState);
-				addChild(overState).y=1;
-				overState.x = 5;
-			} else {
-				if (overState.parent == this) removeChild(overState);
-				addChild(upState).y=1;
-				upState.x = 5;
-			}
-		}
-	}
-	public function enable():void {
-		_enabled = true;
-		hover(_hover);
-	}
-	public function enabled():Boolean {
-		return _enabled;
-	}
-}
-interface ITabView {
-	function addChild(child:DisplayObject):DisplayObject;
-	function dispatchEvent(event:Event):Boolean;
-	function removeChild(child:DisplayObject):DisplayObject;
-}
-class ShapeColorData {
-	public var shape:Shape;
-	public var graphics:Graphics;
-	public var colors:Vector.<int> = new Vector.<int>(1);
-	public function ShapeColorData(data:Shape, ...colors):void {
-		shape = data;
-		graphics = data.graphics;
-		colors.forEach(assignColors);
-	}
-	private function assignColors(c:uint, i:uint, _:Array):void {
-		colors[i] = c;
-	}
-}
-class TabListButton extends Shape implements /*ITabList,*/ IHover {
+class TabListButton extends Shape implements ITabList, IHover {
 	private var cont:ITabView;
 	private var _enabled:Boolean, _over:Boolean;
 	public function TabListButton(_cont:ITabView):void {
@@ -2797,8 +2796,6 @@ class TabListButton extends Shape implements /*ITabList,*/ IHover {
 		}
 	}
 }
-
-
 class TabView extends UIControl implements ITabView {
 	private var contentItemTable:Dictionary = new Dictionary;
     private var _currentItem:TabViewItem, tabBar:TabBar, tabContainer:Sprite;
@@ -2807,19 +2804,23 @@ class TabView extends UIControl implements ITabView {
         return _currentItem;
     }
     public function set currentItem(value:TabViewItem):void {
-        if (_currentItem != value) {
-            if (_currentItem) {
+		if (!value) {
+            if (_currentItem)
                 removeChild(_currentItem.content);
-            }
-            if (value && ! value.closed()) {
+			_currentItem = null;
+			updateView();
+		} else if (_currentItem != value) {
+            if (!value.closed()) {
+				if (_currentItem)
+					removeChild(_currentItem.content);
 				_currentItem = value;
-				if (!~tabs.indexOf(value)) {
-					tabs.push(value);
+				if (!~tabs.indexOf(value)) { // ~ converts -1 to 0 and 0 to -1; ! converts 0 to true and everything else to false
 					tabBar.addTab(value);
+					tabs.push(value);
 				}
 				tabBar.focusTab(value);
                 addChild(value.content);
-            } else _currentItem = null;
+            }
 			updateView();
         }
     }
@@ -2837,12 +2838,11 @@ class TabView extends UIControl implements ITabView {
     }
     public function addItem(content:DisplayObject, title:String):void {
         var item:TabViewItem = new TabViewItem(content, title);
+		tabs.push(item);
         item.addEventListener(Event.CLOSE, itemCloseHandler);
         item.addEventListener(MouseEvent.CLICK, itemClickHandler);
         contentItemTable[content] = item;
-        currentItem = item;
 		tabBar.addTab(item);
-		tabs.push(item);
         updateView();
     }
     public function setTitle(content:DisplayObject, title:String):void {
@@ -2856,7 +2856,7 @@ class TabView extends UIControl implements ITabView {
 			tabBar.removeTab(item);
 			if (_currentItem == item) {
 				var t:TabViewItem = (item.lastTab as TabViewItem);
-				if (t && !t.closed()) currentItem = t;
+				if (t && !t.closed()) tabBar.focusTab(t);
 				else currentItem = null;
 			}
 			delete contentItemTable[item.content];
@@ -2896,7 +2896,7 @@ class TabView extends UIControl implements ITabView {
 		graphics.endFill();
 		
 		tabBar.updateTabPositions();
-        
+
         if (_currentItem) {
             var dsp:DisplayObject = _currentItem.content;
             dsp.x = 4;
@@ -2913,22 +2913,19 @@ class TabView extends UIControl implements ITabView {
         updateView();
 	}
 }
-
-
+//}
 import playerio.DatabaseObject;
 import flash.utils.getTimer;
 import ugLabs.net.Kong;
 // UG Added
 class BottomUIBar extends UIControl {
-	
 	private var loadButton:SimpleButton;
 	private var postButton:SimpleButton;
 	private var clearButton:SimpleButton;
 	private var textFieldBG:Sprite;
 	public var textField:TextInput;
 	public var tabView:TabView;
-	public function BottomUIBar()
-	{
+	public function BottomUIBar() {
 		loadButton = createAddButton("Load Code");
 		loadButton.addEventListener(MouseEvent.CLICK, loadCode);
 		loadButton.x = 286;
@@ -2956,18 +2953,14 @@ class BottomUIBar extends UIControl {
 		textField.x = 15;
 		textField.y = 510;
 		addChild(textField);
-		
-		
 	}
 	
-	private function clearClickHandler(e:MouseEvent):void 
-	{
+	private function clearClickHandler(e:MouseEvent):void {
 		TextEditor(tabView.currentItem.content).text = "";
 		tabView.currentItem.title = "Untitled";
 	}
 	
-	private function postClickHandler(e:MouseEvent):void 
-	{
+	private function postClickHandler(e:MouseEvent):void {
 		var E:TextEditor = tabView.currentItem.content as TextEditor;
 		if(!E || E.text.length < 10) return;
 		var key:String = "codeD" + Kong.userName.substr(0, 7) + getTimer();
@@ -2975,15 +2968,13 @@ class BottomUIBar extends UIControl {
 		Main.client.bigDB.createObject("CodeBox", key, { data:E.text }, textPostingCallback, textPostingError);
 		KongChat.log("Posted code");
 	}
-	public function textPostingError(e:*):void
-	{
+	public function textPostingError(e:*):void {
 		// error in trying to add to database
 		textField.text = e.toString();
 		
 		KongChat.log("Error in posting code to database" );
 	}
-	public function textPostingCallback(o:DatabaseObject):void
-	{
+	public function textPostingCallback(o:DatabaseObject):void {
 		// post the short url in the loadField
 		textField.text = o.key;
 		KongChat.log("Key is " + o.key);
@@ -2991,24 +2982,19 @@ class BottomUIBar extends UIControl {
 		KongChat.log("No Error thrown");
 	}
 	
-	public function loadCode(e:MouseEvent = null):void 
-	{
-		if(e == null)
-		{
+	public function loadCode(e:MouseEvent = null):void {
+		if(e == null) {
 			Psycode(parent).handleLabelClick();
 		}
 		var key:String = textField.text;
-		if(key.length < 6)
-		{
+		if(key.length < 6) {
 			KongChat.log("Key is too short");
 			return;
 		}
 		
 		// loop to see if it already exists
-		for (var i:int = 0; i < tabView.count; i++)
-		{
-			if (tabView.getTabViewItemAt(i).title == key)
-			{
+		for (var i:int = 0; i < tabView.count; i++) {
+			if (tabView.getTabViewItemAt(i).title == key) {
 				KongChat.log("TabView already exists");
 				tabView.currentItem = tabView.getTabViewItemAt(i);
 				return;
@@ -3019,26 +3005,17 @@ class BottomUIBar extends UIControl {
 		KongChat.log("Attempting to load code");
 		Main.client.bigDB.load("CodeBox",key,textLoadingCallback,textLoadingError);
 	}
-	public function textLoadingError(e:*):void
-	{
+	public function textLoadingError(e:*):void {
 		TextEditor(tabView.currentItem.content).text =  "Could not load data" + e;
 		KongChat.log("Error Loading code");
 	}
-	public function textLoadingCallback(o:DatabaseObject):void
-	{
-		if (o.data == null)
-		{
+	public function textLoadingCallback(o:DatabaseObject):void {
+		if (o.data == null) {
 			return;
 		}
-		tabView.addItem(new TextEditor(), textField.text);
-		if (tabView.count != 0)
-		{
-			tabView.currentItem = tabView.getTabViewItemAt(tabView.count - 1);
-			KongChat.log("Changed current item to corret item");
-		}
-		else
-			tabView.currentItem = tabView.getTabViewItemAt(0);
-		TextEditor(tabView.currentItem.content).text = o.data;
+		var a:TextEditor = new TextEditor();
+		a.text = o.data;
+		tabView.addItem(a, textField.text);
 		KongChat.log("Set the current item's text to " + o.data.substring(0, 15) );
 	}
 	
@@ -3049,21 +3026,21 @@ class BottomUIBar extends UIControl {
 		var fmt:TextFormat = new TextFormat("_sans", 13);
         fmt.leftMargin = 4;
         fmt.rightMargin = 4;
-        
+
         var label:TextField = new TextField();
         label.selectable = false;
         label.defaultTextFormat = fmt;
 		label.text = text;
 		label.y = 4;
         o.addChild(label);
-        
+
         var label2:TextField = new TextField();
         label2.selectable = false;
         label2.defaultTextFormat = fmt;
 		label2.text = text;
 		label2.y = 4;
         u.addChild(label2);
-        
+
         o.graphics.beginFill(0x666666);
         o.graphics.drawRoundRect(0, 0, 100, 24, 8);
         o.graphics.beginFill(0xEEEEEE);
@@ -3074,7 +3051,7 @@ class BottomUIBar extends UIControl {
         u.graphics.beginGradientFill(GradientType.LINEAR, [0xD3DFEE, 0xC1CFDD], [1, 1], [0x00, 0xFF], mtx);
         u.graphics.drawRoundRect(1, 1, 100, 24, 8);
 		u.graphics.endFill();
-        
+
         var btn:SimpleButton = new SimpleButton();
         btn.upState = u;
         btn.overState = o;
@@ -3083,8 +3060,7 @@ class BottomUIBar extends UIControl {
         return btn;
     }
 	
-	public function createTextField(text:String):TextInput
-	{
+	public function createTextField(text:String):TextInput {
 		var fmt:TextFormat = new TextFormat("_sans", 13);
         fmt.leftMargin = 4;
         fmt.rightMargin = 4;
@@ -3107,17 +3083,14 @@ class BottomUIBar extends UIControl {
 		return field;
 	}
 	
-	private function fieldFocusOut(e:FocusEvent):void 
-	{
+	private function fieldFocusOut(e:FocusEvent):void {
 		if (e.currentTarget.text == "") e.currentTarget.text = "shortcode";
 	}
 	
-	private function fieldFocusIn(e:FocusEvent):void 
-	{
+	private function fieldFocusIn(e:FocusEvent):void {
 		if (e.currentTarget.text == "shortcode") e.currentTarget.text = "";
 	}
-	public function createTextFieldBackground():Sprite
-	{
+	public function createTextFieldBackground():Sprite {
 		var u:Sprite = new Sprite();
 		
         var mtx:Matrix = new Matrix();
@@ -3125,7 +3098,7 @@ class BottomUIBar extends UIControl {
         u.graphics.beginGradientFill(GradientType.LINEAR, [0xD3DFEE, 0xC1CFDD], [1, 1], [0x00, 0xFF], mtx);
         u.graphics.drawRoundRect(1, 1, 200, 30, 8);
 		u.graphics.endFill();
-        
+
        return u;
 	}
 }

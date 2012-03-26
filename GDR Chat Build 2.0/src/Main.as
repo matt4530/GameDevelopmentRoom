@@ -1,7 +1,6 @@
 ﻿package 
 {
 	import com.bit101.components.Text;
-	import com.bit101.utils.MinimalConfigurator;
 	import com.greensock.easing.Quint;
 	import com.greensock.TweenLite;
 	import flash.display.Sprite;
@@ -10,7 +9,9 @@
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import flash.net.navigateToURL;
 	import flash.net.SharedObject;
+	import flash.net.URLRequest;
 	import flash.utils.setTimeout;
 	import playerio.Client;
 	import playerio.Connection;
@@ -40,7 +41,7 @@
 		public static var splashScreenFinished:Boolean = false;
 		
 		public function Main():void 
-		{
+		{			
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
@@ -49,6 +50,10 @@
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
+			
+			
+			
+			
 			
 			
 			setStageProperties();
@@ -75,25 +80,24 @@
 			debugField.height = stage.stageHeight;
 			debugField.selectable = false;
 			debugField.editable = false;
-			TextEffect.setField(debugField);
-			TextEffect.add("       ====[GDR]====");
-			TextEffect.add("\n");
+			add("       ====[GDR]====");
+			add("\n");
 			
-			//TextEffect.start(0.5);
+			//start(0.5);
 		}
 		
 		public function checkSiteLock():void
 		{
 			
 			
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.add("SiteLock Activating........");
-			TextEffect.add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("SiteLock Activating........");
+			add("\n");
 			SiteLock.allowLocalPlay();
 			SiteLock.allowSites(["kongregate.com"]);
 			SiteLock.registerStage(stage);
@@ -101,12 +105,12 @@
 			if (SiteLock.isLocal())
 			{
 				//initChatManagers();
-				TextEffect.add("Denied Access...............");
-				TextEffect.add("\n");
-				TextEffect.add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
-				TextEffect.add("\n");
-				TextEffect.add("\nLoading Local Mode");
-				TextEffect.add("\n");
+				add("Denied Access...............");
+				add("\n");
+				add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
+				add("\n");
+				add("\nLoading Local Mode");
+				add("\n");
 				
 				debugField.selectable = true;
 				
@@ -114,52 +118,65 @@
 			}
 			else if (approved)
 			{
-				TextEffect.add("Site Accepted...............");
-				TextEffect.add("\n");
+				add("Site Accepted...............");
+				add("\n");
 				connectToKongregate();
 			}
 			else
 			{
-				TextEffect.add("Site Denied...........");
-				TextEffect.add("\n");
-				TextEffect.add("GDR Denied.");
-				TextEffect.add("\n");
-				TextEffect.add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
-				TextEffect.add("\n");
+				add("Site Denied...........");
+				add("\n");
+				add("GDR Denied.");
+				add("\n");
+				add("Visit: http://www.kongregate.com/games/UnknownGuardian/game-development-room-gdr");
+				add("\n");
 				debugField.selectable = true;
 			}
 		}
 		
 		public function connectToKongregate():void 
 		{
-			TextEffect.add("Connecting to Kong.......");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
+			add("Connecting to Kong.......");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
 			Kong.connectToKong(stage, handleKongUserConnect);
 		}
 		
 		public function handleKongUserConnect():void
 		{
-			TextEffect.add("Connection Established...");
-			TextEffect.add("\n");
+			add("Connection Established...");
+			add("\n");
+			
+			SaveSystem.createOrLoadSlots(["GDR_SaveSystem"]);
+			SaveSystem.openSlot("GDR_SaveSystem");
+			
 			if (Kong.isGuest)
 			{
-				TextEffect.add("Kong login needed..........");
-				TextEffect.add("\n");
-				TextEffect.addGroup("...................................");
-				TextEffect.add("\n");
+				add("Kong login needed..........");
+				add("\n");
+				add("...................................");
+				add("\n");
 				if (!SiteLock.isLocal())
 				{
-					TextEffect.setAllCompleteCallback(forceGuestLogin);
+					forceGuestLogin();
 				}
 				else
 				{
 					//allow credential input
-					TextEffect.add("Dev Login format:    Userid <space> token    Press Enter to login.\n");
-					TextEffect.add("Dev Login> ");
+					add("Dev Login format:    Userid <space> token    Press Enter to login.\n");
+					add("Dev Login> ");
+					
+					
+					var lastLogin:* = SaveSystem.getCurrentSlot().read("LastLocalLogin");
+					if (lastLogin != undefined)
+					{
+						add(lastLogin);
+					}
+					
+					
 					debugField.editable = true;
 					stage.focus = debugField.textField;
 					setTimeout(function():void{
@@ -171,8 +188,7 @@
 			}
 			
 			
-			SaveSystem.createOrLoadSlots(["GDR_SaveSystem"]);
-			SaveSystem.openSlot("GDR_SaveSystem");
+			
 			var names:* = SaveSystem.getCurrentSlot().read("Names");
 			trace("Names: " + names);
 			if (names == undefined)
@@ -199,14 +215,21 @@
 		
 		private function kDown(e:KeyboardEvent):void 
 		{
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN, kDown);
 			if (e.keyCode == 13)
 			{
 				var interestArea:String = debugField.text.substring(debugField.text.lastIndexOf("Dev Login> ") + "Dev Login> ".length);
 				//trace(interestArea);
 				//return;
 				var fakeID:String = interestArea.split(" ")[0];
-				var fakeToken:String = interestArea.split(" ")[1];
-				Kong.userName = "[LocalDev]" + fakeID;
+				var fakeToken:String = interestArea.split(" ")[1].substr(0, 64);
+				Kong.userName = "Local" + fakeID;
+				trace(fakeToken.length);
+				SaveSystem.getCurrentSlot().write("LastLocalLogin", fakeID + " " + fakeToken.substr(0, 64) );
+				SaveSystem.saveCurrentSlot();
+				
+				
+				
 				//trace(fakeID, fakeToken);
 				//return;
 				try
@@ -223,20 +246,20 @@
 				}
 				catch (e:Error)
 				{
-					TextEffect.addGroup("Server Connection Failed. Please refresh");
-					TextEffect.add("\n");
+					add("Server Connection Failed. Please refresh");
+					add("\n");
 					return;
 				}
 			}
 		}
 		public function displayConnectedUserData():void
 		{
-			TextEffect.add("Hello " + Kong.userName);
-			TextEffect.add("\n");
-			TextEffect.add("ID: " + Kong.userId);
-			TextEffect.add("\n");
-			TextEffect.add("Fetching User Info.........");
-			TextEffect.add("\n");
+			add("Hello " + Kong.userName);
+			add("\n");
+			add("ID: " + Kong.userId);
+			add("\n");
+			add("Fetching User Info.........");
+			add("\n");
 			Kong.getPlayerInfo(grabbedKongUserData);
 			///////////grabbedKongUserData(); ////////////////////////////////////////////////////////////////
 		}
@@ -244,18 +267,18 @@
 		{
 			if (isBanned())
 			{
-				TextEffect.add("Denied Access...............");
-				TextEffect.add("\n");
+				add("Denied Access...............");
+				add("\n");
 				return;
 			}
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.add("Connecting to Server.....");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
+			add("...................................");
+			add("\n");
+			add("Connecting to Server.....");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
 			addEventListener(Event.ENTER_FRAME, delayUntilSplashPlays);
 			//connectToPlayerIO();
 		}
@@ -299,22 +322,22 @@
 			}
 			catch (e:Error)
 			{
-				TextEffect.addGroup("Server Connection Failed. Please refresh");
-				TextEffect.add("\n");
+				add("Server Connection Failed. Please refresh");
+				add("\n");
 				return;
 			}
 		}
 		
 		public function connectedToPlayerIO(_client:Client):void
 		{
-			TextEffect.addGroup("Connected....................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("Joining Room.................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
+			add("Connected....................");
+			add("\n");
+			add("Joining Room.................");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
 			
 			client = _client;
 			client.multiplayer.createJoinRoom(
@@ -329,20 +352,20 @@
 		}
 		public function connectionFailedToPlayerIO(error:PlayerIOError):void
 		{
-			TextEffect.add("[Main][connectionFailedToPlayerIO][PlayerIOError] " + error);
-			TextEffect.add("\n");
+			add("[Main][connectionFailedToPlayerIO][PlayerIOError] " + error);
+			add("\n");
 		}		
 		public function handleJoin(_connection:Connection):void
 		{
-			TextEffect.add("Joined Room................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.addGroup("...................................");
-			TextEffect.add("\n");
-			TextEffect.add("       ====[GDR]====");
-			TextEffect.add("\n");
-			TextEffect.setAllCompleteCallback(tweenFieldOut);
+			add("Joined Room................");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("...................................");
+			add("\n");
+			add("       ====[GDR]====");
+			add("\n");
+			tweenFieldOut();
 			
 			connection = _connection;
 			connection.addMessageHandler("ChatInit", onInit)
@@ -373,10 +396,16 @@
 
 		public function handleJoinError(error:PlayerIOError):void
 		{
-			TextEffect.add("[Main][handleJoinError][PlayerIOError] " + error);
-			TextEffect.add("\n");
+			add("[Main][handleJoinError][PlayerIOError] " + error);
+			add("\n");
 		}
 		
+		
+		
+		public function add(m:String):void
+		{
+			debugField.text += m;
+		}
 		
 		
 		

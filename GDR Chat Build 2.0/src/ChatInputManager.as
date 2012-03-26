@@ -11,8 +11,6 @@
 	
 	public class ChatInputManager
 	{
-		//scroll model
-		public var scrollBox:LinkScrollBox;
 
 		
 		public function ChatInputManager():void
