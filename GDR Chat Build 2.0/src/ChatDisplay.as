@@ -52,6 +52,7 @@ package  //original
 		
 		private var poll:Poll;
 		private var pollColor:String = "#00CC33";
+		private var gotFirstHistory:Boolean = false;
 		
 		
 		
@@ -282,6 +283,23 @@ package  //original
 				if (_type == "Dev") minMessageInverval = 1202;
 			}
 		}
+		public function onHistoryMessage(m:Message = null, message:String = ""):void
+		{
+			if (gotFirstHistory == true) return;
+			gotFirstHistory = true;
+			trace("message Dump " + m.toString());
+			var stringDump:String = "";
+			for (var i:int = 0; i < m.length; i+=3)
+			{
+				
+				
+				/*stringDump += getHistoryTimeStamp(Date.parse(m.getString(i)));*/
+				/*stringDump += m.getString(i) + " ";*/
+				stringDump += " <b>[" + m.getString(i+1) + "]</b> ";
+				stringDump += m.getString(i + 2) + "\n";
+			}
+			displayMessage("Recent Chat History:\n" + stringDump);
+		}
 		public function onJoin(m:Message, id:String, name:String, type:String, color:String, status:String):void
 		{
 			//handle user scroll box
@@ -366,7 +384,17 @@ package  //original
 			}
 			if (m.indexOf("/dev") == 0) //debug
 			{
-				displayMessage('<font color="#CC0033"><b>[System]</b></font> Do NOT share this token with any user. <b>Users can fake your login if you share this token with them.</b> (On accidental sharing, change your Kongregate password immediately to generate a new token)\nUSERID: ' + Kong.userId +'\nTOKEN: ' + Kong.userToken+'\n\nAbuse of the development feature will result in a ban on your account regardless of mod/dev/reg account type.');
+				displayMessage('<font color="#CC0033"><b>[System]</b></font> Use the Match Tab to get your token. -->');
+				return;
+			}
+			if (m.indexOf("/todo ") == 0)
+			{
+				var words:Array = m.split(" ");
+				words.splice(0, 1);
+				Kong.services.privateMessage( {
+					content:("//TODO: " + words.join(" "))
+				});
+				displayMessage('<font color="#CC0033"><b>[System]</b></font> Added to your todo list.');
 				return;
 			}
 			if (m.indexOf("/vote") == 0)
@@ -503,6 +531,8 @@ package  //original
 			return;
 		}
 		
+		
+		
 		public function onMessage(m:Message = null, id:String = "", message:String = ""):void
 		{
 			trace("[ChatDisplay][onMessage] m = " + m + ", id = " + id + ", message = " + message);
@@ -596,6 +626,8 @@ package  //original
 					}
 					return;
 				}
+				
+				
 				
 				if (message.indexOf("/vote") == 0)
 				{
@@ -931,6 +963,23 @@ package  //original
 		}
 		public function getTimeStamp():String {
 			var time:Date = new Date();
+			if (time.hours > 12) //prevent modding to 0 errors
+			{
+				time.hours %= 12;
+			}
+			else if (time.hours == 0)
+			{
+				time.hours = 12;
+			}
+			var minutes:String = "" + time.minutes;
+			if(time.minutes < 10)//less than 10
+			{
+				minutes = "0" + minutes;//add a 0 before
+			}
+			return "" + time.hours + ":" + minutes + " ";//format the date into "h:m"
+		}
+		public function getHistoryTimeStamp(ms:Number):String {
+			var time:Date = new Date(ms);
 			if (time.hours > 12) //prevent modding to 0 errors
 			{
 				time.hours %= 12;

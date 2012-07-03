@@ -84,6 +84,7 @@ package
 		
 		static private function onTabShown(e:Event):void 
 		{
+			Kong.chat.clearMessages();
 			Kong.chat.displayCanvasImage("APIHeader", "http://i.imgur.com/oksxs.png", { x:0, y:0 } );
 			Kong.chat.displayMessage("API Ready...", "GDR");
 			Kong.chat.displayMessage("Developers can create their own util methods for GDR! Make suggestions in the GDR thread. http://www.kongregate.com/forums/4-game-programming/topics/93529-game-development-room-gdr. A list of commands is found with /help","GDR");

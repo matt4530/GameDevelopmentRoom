@@ -132,6 +132,7 @@ package
 			Main.connection.addMessageHandler("ChatJoin", Main.onJoin);
 			Main.connection.addMessageHandler("ChatLeft", Main.onLeave);
 			Main.connection.addMessageHandler("ChatMessage", Main.onMessage)
+			connection.addMessageHandler("HistoryMessage", Main.onHistoryMessage);
 			Main.chatDisplay.displayEvent("reconnect", "");
 			if (Main.roomName == Main.regRoomName)
 				Main.chatDisplay.displayEvent("joinRoom", "Regular");

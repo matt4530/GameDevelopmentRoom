@@ -3,6 +3,7 @@
 	import com.bit101.components.Text;
 	import com.greensock.easing.Quint;
 	import com.greensock.TweenLite;
+	import flash.display.Bitmap;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageQuality;
@@ -27,9 +28,11 @@
 	 */
 	public class Main extends Sprite 
 	{
+		[Embed(source = "assets/gdrback.png")]private static const BG:Class;
+		public static var backgroundImage:Bitmap = new BG();
 		public static var roomName:String = Main.regRoomName;
 		public static var collabRoomName:String = "{collabz2}";
-		public static var regRoomName:String = "{main1}";
+		public static var regRoomName:String = "{main229387972^&%&$%^##$^%#(*&^)^*(^}";
 		public static var debugField:Text;
 		public static var chatDisplay:ChatDisplay;
 		public static var playerList:PlayerList;
@@ -51,8 +54,8 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			
-			
+			backgroundImage.width = 650;
+			addChild(backgroundImage);
 			
 			
 			
@@ -372,6 +375,7 @@
 			connection.addMessageHandler("ChatJoin", onJoin);
 			connection.addMessageHandler("ChatLeft", onLeave);
 			connection.addMessageHandler("ChatMessage", onMessage);
+			connection.addMessageHandler("HistoryMessage", onHistoryMessage);
 			connection.addMessageHandler("TimeReply", onTimeReply);
 			trace("[Main][handleJoin] Connection = " + _connection);
 			
@@ -433,6 +437,11 @@
 		{
 			trace("[Main] onMessage");
 			chatDisplay.onMessage(m, id, message);
+		}
+		public static function onHistoryMessage(m:Message = null, message:String = ""):void
+		{
+			trace("[Main] onHistoryMessage");
+			chatDisplay.onHistoryMessage(m, message);
 		}
 		public static function onTimeReply(m:Message = null, id:String = "", message:String = ""):void
 		{

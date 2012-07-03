@@ -36,7 +36,8 @@ namespace MyGame {
     [RoomType("TicTacToe")]
 	public class GameCode : Game<Player> {
 			
-		
+		public ArrayList recentMessages = new ArrayList();
+
 		// This method is called when an instance of your the game is created
 		public override void GameStarted() {
             //AddTimer(delegate { resetChatBooleans(); }, 1400);  //1.4 seconds
@@ -183,6 +184,15 @@ namespace MyGame {
 			}
             player.Send(m);
 
+
+            Message history = Message.Create("HistoryMessage");
+            for (int i = 0; i < recentMessages.Count; i+=3)
+            {
+                history.Add(recentMessages[i], recentMessages[i + 1], recentMessages[i + 2]);
+            }
+
+
+            player.Send(history);
 
             ////Broadcast("ChatJoin", player.Id, player.JoinData["Name"],player.JoinData["Type"]);
             //Broadcast("ChatJoin", (player.Id.ToString() + "|" + player.UserName + "|" + player.UserType + "|" + player.Color + "|" + player.Status) as String); //send info about this player to other players
@@ -378,12 +388,14 @@ namespace MyGame {
                             {
                                 if (p.UserName == reciever) //reciever is player we are targetting
                                 {
-                                    player.Send("ChatMessage", p.Id, "Alts = " + p.SecretInfo); //send message from target to requester
+                                    player.Send("ChatMessage", p.Id, "Alts = " + p.SecretInfo);// + " IP = " + p.IPAddress); //send message from target to requester
                                     return;
                                 }
                             }
+                            return;
                         }
                     }
+                   
                     if (m.IndexOf("/w ") == 0)
                     {
                         if (reciever.ToLower() == "mod")
@@ -445,6 +457,15 @@ namespace MyGame {
                     }
                    //player.CanChat = false;
 					Broadcast("ChatMessage", player.Id, m);
+                    recentMessages.Add(DateTime.Now.ToUniversalTime().ToString());
+                    recentMessages.Add(player.UserName);
+                    recentMessages.Add(m);
+
+
+                    if (recentMessages.Count >= 60)
+                    {
+                        recentMessages.RemoveRange(0, 3);
+                    }
 					break;
 				}
                 case "Time": {

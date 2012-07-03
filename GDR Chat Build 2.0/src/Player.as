@@ -253,7 +253,7 @@ package
 		
 		public function getColor():String
 		{
-			/*if (UserName == "BobTheCoolGuy")
+			if (Color == "rainbow")
 			{
 				var r:Number = Math.random() * 15;
 				if (r < 1) return "0xC0C0C0";
@@ -271,7 +271,7 @@ package
 				if (r < 13) return "0x000080";
 				if (r < 14) return "0xFF00FF";
 				if (r < 15) return "0x800080";
-			}*/
+			}
 			return Color;
 		}
 		
