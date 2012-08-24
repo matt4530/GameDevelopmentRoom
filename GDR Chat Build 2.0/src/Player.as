@@ -248,6 +248,7 @@ package
 		
 		public function setColor(c:String):void
 		{
+			c = c.replace(/\W/, "");
 			Color = c;
 		}
 		
