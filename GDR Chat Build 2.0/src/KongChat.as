@@ -47,8 +47,8 @@ package
 			}
 			else if (m == "/rev")
 			{
-				Kong.chat.displayMessage("http://www.kongregate.com/my_revenue_summaries", "GDR");
-				navigateToURL(new URLRequest("http://www.kongregate.com/my_revenue_summaries"));
+				Kong.chat.displayMessage("http://www.kongregate.com/accounts/" + e.data.username + "/my_revenue_summaries", "GDR");
+				navigateToURL(new URLRequest("http://www.kongregate.com/accounts/" + e.data.username + "my_revenue_summaries"));
 			}
 			else if (m == "/log 0")
 			{
