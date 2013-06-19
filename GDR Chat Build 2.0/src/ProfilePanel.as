@@ -36,7 +36,7 @@ package
 		
 		public function changeProfile(n:String):void
 		{
-			KongChat.log("[debug] " + n + " profile loaded" );
+			//KongChat.log("[debug] " + n + " profile loaded" );
 			if (SaveSystem.getCurrentSlot() == null)
 			{
 				SaveSystem.createOrLoadSlots(["GDR_SaveSystem"]);
@@ -60,18 +60,6 @@ package
 			checkBeep.enabled = true;
 			checkBold.enabled = true;
 			
-			if (Main.chatDisplay.isUserAdmin(Kong.userName)/* || Main.chatDisplay.isUserMod(Kong.userName)*/)
-			{
-				silenceMenu.enabled = true;
-				banMenu.enabled = true;
-				silenceBanButton.enabled = true;
-			}
-			else
-			{
-				silenceMenu.enabled = false;
-				banMenu.enabled = false;
-				silenceBanButton.enabled = false;
-			}
 			
 			if (n == Kong.userName)
 			{

@@ -16,6 +16,7 @@ namespace MyGame {
         public String UserType;
         public String Status;
         public String SecretInfo;
+        public String GiTDKey;
         public Boolean MuteSound;
         public Boolean CanChat;
         public Boolean CanPostTime;
@@ -29,6 +30,7 @@ namespace MyGame {
             CanChat = true;
             CanPostTime = true;
             SecretInfo = "";
+            GiTDKey = "none";
             LastMessage = DateTime.Now;
         }
 
@@ -99,6 +101,11 @@ namespace MyGame {
                 //player.PlayerObject.Set("Color", player.JoinData["Color"]);
                 player.PlayerObject.Set("Time", 0);
                 player.PlayerObject.Save();
+            }
+
+            if (player.PlayerObject.Contains("GiTDKey"))
+            {
+                player.GiTDKey = player.PlayerObject.GetString("GiTDKey");
             }
 
             player.UserName = player.JoinData["Name"]; //set the player's username to the connected username
@@ -198,6 +205,15 @@ namespace MyGame {
             //Broadcast("ChatJoin", (player.Id.ToString() + "|" + player.UserName + "|" + player.UserType + "|" + player.Color + "|" + player.Status) as String); //send info about this player to other players
             Broadcast("ChatJoin", player.Id, player.UserName, player.UserType, player.Color, player.Status); //send info about this player to other players
             Console.WriteLine((player.Id.ToString() + "|" + player.UserName + "|" + player.UserType + "|" + player.Color + "|" + player.Status) as String);
+
+            if (player.UserType == "Admin" && player.UserName != "UnknownGuardian" && player.UserName != "Profusion" && player.UserName != "Sanchex" && player.UserName != "BobTheCoolGuy" && player.UserName != "MossyStump" && player.UserName != "joebob23")
+            {
+                Broadcast("ChatMessage", player.Id, "/system :O A real admin!");
+            }
+            else if (player.UserType == "Mod")
+            {
+                Broadcast("ChatMessage", player.Id, "/system Uh oh, a mod is here.");
+            }
 		}
 
 		// This method is called when a player leaves the game
@@ -315,7 +331,7 @@ namespace MyGame {
                     }
                     if (m.IndexOf("/ban ") == 0)
                     {
-                        if (player.ConnectUserId == "kong1138933" || player.UserType == "Admin")//player.UserName == "UnknownGuardian")
+                        if (player.ConnectUserId == "kong1138933" || player.UserType == "Admin") //add joebob23 as false admin)//player.UserName == "UnknownGuardian")
                         //if (player.ConnectUserId == "kong1138933")//player.UserName == "UnknownGuardian")
                         {
                             foreach (Player p in Players)
@@ -334,6 +350,53 @@ namespace MyGame {
                             return;
                         }
                     }
+
+
+                    
+
+
+
+
+
+
+
+
+                    if (m.IndexOf("/gitd ") == 0)
+                    {
+                        String pass = reciever;
+                        if (player.UserType == "Admin" && pass != "none" && pass == player.GiTDKey) //admin feature, reciever is special key.
+                        {
+                            String command = m.Split(' ')[2];
+                            String data = m.Substring(m.IndexOf(command) + command.Length + 1).Trim();
+                            if (command == "image")
+                            {
+                                PlayerIO.BigDB.Load("GiTD", "content",
+                                    delegate(DatabaseObject dbo)
+                                    {
+                                        dbo.Set("image", data);
+                                        dbo.Save();
+                                        player.Send("ChatMessage", player.Id, "/system GiTD Image changed to '" + data + "'");
+                                    });
+                            }
+                            else if (command == "message")
+                            {
+                                PlayerIO.BigDB.Load("GiTD", "content",
+                                    delegate(DatabaseObject dbo)
+                                    {
+                                        dbo.Set("message", data);
+                                        dbo.Save();
+                                        player.Send("ChatMessage", player.Id, "/system GiTD Message changed to '" + data + "'");
+                                    });
+                            }
+                            
+                        }
+                        return;
+                    }
+
+
+
+
+
                     if (m.IndexOf("/say ") == 0 && player.ConnectUserId != "kong1138933")
                     {
                         return;
@@ -483,6 +546,10 @@ namespace MyGame {
                     }
                    //player.CanChat = false;
 					Broadcast("ChatMessage", player.Id, m);
+
+                    if (m.StartsWith("/")) return;
+
+
                     recentMessages.Add(DateTime.Now.ToUniversalTime().ToString());
                     recentMessages.Add(player.UserName);
                     recentMessages.Add(m);
@@ -510,5 +577,7 @@ namespace MyGame {
                 }
 			}
 		}
+
+       
 	}
 }

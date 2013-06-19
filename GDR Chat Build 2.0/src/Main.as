@@ -29,6 +29,7 @@
 	public class Main extends Sprite 
 	{
 		[Embed(source = "assets/gdrback.png")]private static const BG:Class;
+		//[Embed(source = "assets/bkg_day.png")]private static const BG:Class;
 		public static var backgroundImage:Bitmap = new BG();
 		public static var roomName:String = Main.regRoomName;
 		public static var collabRoomName:String = "{collabz2}";
@@ -218,9 +219,11 @@
 		
 		private function kDown(e:KeyboardEvent):void 
 		{
-			stage.removeEventListener(KeyboardEvent.KEY_DOWN, kDown);
+			trace("key down");
+			
 			if (e.keyCode == 13)
 			{
+				stage.removeEventListener(KeyboardEvent.KEY_DOWN, kDown);
 				var interestArea:String = debugField.text.substring(debugField.text.lastIndexOf("Dev Login> ") + "Dev Login> ".length);
 				//trace(interestArea);
 				//return;

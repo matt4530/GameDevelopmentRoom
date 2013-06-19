@@ -242,7 +242,7 @@
 		private static function loadedPlayerInfo(event:Event):void
 		{
 			var load:URLLoader = URLLoader(event.target);
-			var playerData:Object = JSON.decode(load.data);
+			var playerData:Object = com.adobe.serialization.json.JSON.decode(load.data);
 			
 			if(playerData.success)
 			{

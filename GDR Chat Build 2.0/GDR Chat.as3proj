@@ -8,8 +8,8 @@
     <movie fps="30" />
     <movie width="650" />
     <movie height="550" />
-    <movie version="10" />
-    <movie minorVersion="3" />
+    <movie version="11" />
+    <movie minorVersion="5" />
     <movie platform="Flash Player" />
     <movie background="#666666" />
   </output>
@@ -52,6 +52,7 @@
   <libraryPaths>
     <element path="src\ChatSymbols.swc" />
     <element path="src\gdrtest.swc" />
+    <element path="src\assets\Art.swc" />
     <element path="src\MinimalComps_0_9_8.swc" />
   </libraryPaths>
   <!-- External Libraries -->

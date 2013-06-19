@@ -1,6 +1,7 @@
 package  //original
 {
 	import com.adobe.serialization.json.JSON;
+	import fastswf.FastSwfManager;
 	import fl.controls.TextArea;
 	import fl.controls.TextInput;
 	import flash.display.Sprite;
@@ -39,7 +40,7 @@ package  //original
 		public var tabLinks:LinksTab;
 		public var tabMedia:MediaHandler;
 		public var userProfilePanel:ProfilePanel;
-		
+		public var fastSwf:FastSwfManager;
 		public var soundMuted:int = 0; // 0  = all, 1 == name, 2 == none
 		//private var userIsSilenced:Boolean = false;
 		private var userLostFocus:Boolean = false;
@@ -102,6 +103,11 @@ package  //original
 			userProfilePanel.y = 100;
 			addChild(userProfilePanel);
 			
+			fastSwf = new FastSwfManager();
+			fastSwf.x = 589;
+			fastSwf.y = 100;
+			addChild(fastSwf);
+			
 		}
 		public function createChatBox():void
 		{
@@ -149,7 +155,7 @@ package  //original
 		}
 		public function createHeader():void
 		{
-			var profusionLogo:ProfusionLogo = new ProfusionLogo();
+			var profusionLogo:ProfusionLogoBtn = new ProfusionLogoBtn();
 			profusionLogo.x = 573;
 			profusionLogo.y = 24;
 			addChild(profusionLogo);
@@ -164,7 +170,6 @@ package  //original
 			playTimer.x = 342;
 			playTimer.y = 24;
 			addChild(playTimer);
-			
 		}
 		public function createTabs():void
 		{
@@ -521,7 +526,7 @@ package  //original
 		private function traceUserData(e:Event):void 
 		{
 			var load:URLLoader = URLLoader(e.target);
-			var playerData:Object = JSON.decode(load.data);
+			var playerData:Object = com.adobe.serialization.json.JSON.decode(load.data);
 			
 			if(playerData.success)
 			{
@@ -714,11 +719,11 @@ package  //original
 					var restOfMessage:String = message.substr(message.indexOf(words[1]) + words[1].length);
 					if (words[1].toLowerCase() == Kong.userName.toLowerCase())
 					{
-						message = '<font color="#0098FFF">[PM]' + restOfMessage.split('"').join("`").split("'").join("`") + ' (<font color="#CC0033"><u><a href=\"event:@reply' + getUserNameFromId(id) + '">reply</a></u></font>)</font>';
+						message = '<font color="#0098FFF">[PM]' + restOfMessage + ' (<font color="#CC0033"><u><a href=\"event:@reply' + getUserNameFromId(id) + '">reply</a></u></font>)</font>';
 					}
 					else if (getUserNameFromId(id) == Kong.userName)
 					{
-						message = '<font color="#0098FFF">[PM to ' + words[1] + "] " +  restOfMessage.split('"').join("`").split("'").join("`") + '</font>';
+						message = '<font color="#0098FFF">[PM to ' + words[1] + "] " +  restOfMessage + '</font>';
 					}
 					else
 					{
