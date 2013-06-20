@@ -16,7 +16,7 @@ namespace MyGame {
         public String UserType;
         public String Status;
         public String SecretInfo;
-        public String GiTDKey;
+        public String UserKey;
         public Boolean MuteSound;
         public Boolean CanChat;
         public Boolean CanPostTime;
@@ -30,7 +30,7 @@ namespace MyGame {
             CanChat = true;
             CanPostTime = true;
             SecretInfo = "";
-            GiTDKey = "none";
+            UserKey = "none";
             LastMessage = DateTime.Now;
         }
 
@@ -103,9 +103,9 @@ namespace MyGame {
                 player.PlayerObject.Save();
             }
 
-            if (player.PlayerObject.Contains("GiTDKey"))
+            if (player.PlayerObject.Contains("UserKey"))
             {
-                player.GiTDKey = player.PlayerObject.GetString("GiTDKey");
+                player.UserKey = player.PlayerObject.GetString("UserKey");
             }
 
             player.UserName = player.JoinData["Name"]; //set the player's username to the connected username
@@ -352,11 +352,15 @@ namespace MyGame {
                     }
 
 
-                    
 
 
 
-
+                    if (m.IndexOf("/refresh") == 0)
+                    {
+                        player.Send("ChatMessage", player.Id, "/system Refreshing by server force disconnect");
+                        player.Disconnect();
+                        return;
+                    }
 
 
 
@@ -364,7 +368,7 @@ namespace MyGame {
                     if (m.IndexOf("/gitd ") == 0)
                     {
                         String pass = reciever;
-                        if (player.UserType == "Admin" && pass != "none" && pass == player.GiTDKey) //admin feature, reciever is special key.
+                        if (player.UserType == "Admin" && pass != "none" && pass == player.UserKey) //admin feature, reciever is special key.
                         {
                             String command = m.Split(' ')[2];
                             String data = m.Substring(m.IndexOf(command) + command.Length + 1).Trim();
@@ -389,6 +393,87 @@ namespace MyGame {
                                     });
                             }
                             
+                        }
+                        return;
+                    }
+
+                    if (m.IndexOf("/addMod ") == 0)
+                    {
+                        String pass = reciever;
+                        if (player.UserType == "Admin" && pass != "none" && pass == player.UserKey) //admin feature, reciever is special key.
+                        {
+                            String newmod = m.Split(' ')[2];
+                            foreach (Player newModP in Players)
+                            {
+                                if (newModP.UserName == newmod)
+                                {
+                                    PlayerIO.BigDB.Load("PlayerObjects", newModP.ConnectUserId,
+                                    delegate(DatabaseObject dbo)
+                                    {
+                                        if (dbo.Contains("Type"))
+                                        {
+                                            if (dbo.GetString("Type") == "Admin")
+                                                player.Send("ChatMessage", player.Id, "/system " + newmod + " is already an administrator. Cannot change to moderator");
+                                            else if (dbo.GetString("Type") == "Mod")
+                                                player.Send("ChatMessage", player.Id, "/system " + newmod + " is already a moderator. Cannot change to moderator");
+                                        }
+                                        else
+                                        {
+                                            dbo.Set("Type", "Mod");
+                                            dbo.Save();
+                                            Broadcast("ChatMessage", player.Id, "/system " + newmod + " is now a moderator.");
+                                            newModP.Send("ChatMessage", player.Id, "/system Congratulations. You are now a moderator. You are automatically being refreshed to show your new status.");
+                                            newModP.Disconnect(); //force refresh.
+                                        }
+                                        
+                                    });
+                                    return;
+                                }
+                            }
+
+                        }
+                        return;
+                    }
+
+                    if (m.IndexOf("/removeMod ") == 0)
+                    {
+                        String pass = reciever;
+                        if (player.UserType == "Admin" && pass != "none" && pass == player.UserKey) //admin feature, reciever is special key.
+                        {
+                            String newmod = m.Split(' ')[2];
+                            foreach (Player oldModP in Players)
+                            {
+                                if (oldModP.UserName == newmod)
+                                {
+                                    PlayerIO.BigDB.Load("PlayerObjects", oldModP.ConnectUserId,
+                                    delegate(DatabaseObject dbo)
+                                    {
+                                        if (dbo.Contains("Type"))
+                                        {
+                                            if (dbo.GetString("Type") == "Admin")
+                                                player.Send("ChatMessage", player.Id, "/system " + newmod + " is already an administrator. Cannot remove moderator status");
+                                            else if (dbo.GetString("Type") == "Mod")
+                                            {
+                                                dbo.Remove("Type");
+                                                dbo.Save();
+                                                Broadcast("ChatMessage", player.Id, "/system " + newmod + " is demodded.");
+                                                oldModP.Send("ChatMessage", player.Id, "/system You have been demodded. You are automatically being refreshed to show your new status.");
+                                                oldModP.Disconnect(); //force refresh.
+                                            }
+
+                                            
+                                        }
+                                        else
+                                        {
+                                            if (dbo.GetString("Type") == "Admin")
+                                               player.Send("ChatMessage", player.Id, "/system " + newmod + " is not a moderator. Cannot remove moderator status");
+                                        }
+
+                                    });
+                                    return;
+                                }
+                            }
+
                         }
                         return;
                     }
