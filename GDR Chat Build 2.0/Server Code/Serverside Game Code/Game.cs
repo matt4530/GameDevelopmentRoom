@@ -201,12 +201,22 @@ namespace MyGame {
 
             player.Send(history);
 
+            if (player.UserName.Length < 4)
+            {
+                player.UserName = player.ConnectUserId;
+            }
+
             ////Broadcast("ChatJoin", player.Id, player.JoinData["Name"],player.JoinData["Type"]);
             //Broadcast("ChatJoin", (player.Id.ToString() + "|" + player.UserName + "|" + player.UserType + "|" + player.Color + "|" + player.Status) as String); //send info about this player to other players
             Broadcast("ChatJoin", player.Id, player.UserName, player.UserType, player.Color, player.Status); //send info about this player to other players
             Console.WriteLine((player.Id.ToString() + "|" + player.UserName + "|" + player.UserType + "|" + player.Color + "|" + player.Status) as String);
 
-            if (player.UserType == "Admin" && player.UserName != "UnknownGuardian" && player.UserName != "Profusion" && player.UserName != "Sanchex" && player.UserName != "BobTheCoolGuy" && player.UserName != "MossyStump" && player.UserName != "joebob23")
+
+            if (player.PlayerObject.Contains("JoinMessage") && (player.UserType == "Admin" || player.UserType == "Mod"))
+            {
+                Broadcast("ChatMessage", player.Id, "/system " + player.PlayerObject.GetString("JoinMessage"));
+            }
+            else if (player.UserType == "Admin" && player.UserName != "UnknownGuardian" && player.UserName != "Profusion" && player.UserName != "Sanchex" && player.UserName != "BobTheCoolGuy" && player.UserName != "MossyStump" && player.UserName != "joebob23")
             {
                 Broadcast("ChatMessage", player.Id, "/system :O A real admin!");
             }
@@ -479,6 +489,15 @@ namespace MyGame {
                     }
 
 
+                    if (m.IndexOf("/joinMessage") == 0)
+                    {
+                        if (player.UserType == "Mod" || player.UserType == "Admin")
+                        {
+                            player.PlayerObject.Set("JoinMessage", m.Substring(m.IndexOf(" ") + 1));
+                            player.PlayerObject.Save();
+                        }
+                        return;
+                    }
 
 
 
