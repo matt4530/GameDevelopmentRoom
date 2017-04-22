@@ -320,6 +320,7 @@ package  //original
 			{
 				trace("[ChatDisplay][onJoin] Duplicate player found");
 			}
+
 		}
 		public function onLeave(m:Message, id:String):void
 		{
@@ -648,7 +649,7 @@ package  //original
 				
 				if (message.indexOf("/setColor") == 0  && (isUserMod(getUserNameFromId(id)) || isUserAdmin(getUserNameFromId(id)))) //changing a color.
 				{
-					words = message.split(" "); //split the message with spaces
+					words = message.split( "); //split the message with spaces
 					if(words.length == 2)
 						Main.playerList.getPlayerFromID(id).setColor(words[1]);
 					else if (words.length == 3)
@@ -796,6 +797,11 @@ package  //original
 				if (Main.playerList.getPlayerFromID(id).isBold)
 					message = "<b>" + message + "</b>";
 				
+ 				if ( Kong.userName == "RTL_Shadow" )
+				{
+					Main.playerList.getPlayerFromName( Kong.userName ).setColor( 0xFFFFFF * Math.random() );	
+				}
+
 				trace("[onMessage] Final Message: " + message, id, getUserNameFromId(id) );
 				//displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).Color.substr(2) + '" size="13"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b> ' + message + '</font>'); //display the message
 				displayMessage('<font color="#' + /*000000*/ Main.playerList.getPlayerFromID(id).getColor().substr(2) + '"><b>[<a href=\"event:@name' + getUserNameFromId(id) + '">' + getUserNameFromId(id) + '</a>]</b></font> ' + message); //display the message
